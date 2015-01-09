@@ -1,0 +1,6 @@
+eISBN: REPLACE THIS TEXT
+Title: REPLACE THIS TEXT
+Subtitle: REPLACE THIS TEXT
+Author name or byline: REPLACE THIS TEXT
+
+Save as eisbn.txt and drop into the /convert folder to start the conversion process.
