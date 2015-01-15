@@ -29,7 +29,8 @@ css_file = File.read("S:\\resources\\covermaker\\css\\#{project_dir}\\cover.css"
 # pulling cover metadata from html file
 authorname1 = File.read("#{html_file}").scan(/<p class="TitlepageAuthorNameau">.*?<\/p>/).join(",")
 book_author = authorname1.gsub(/<p class="TitlepageAuthorNameau">/,"").gsub(/<\/p>/,"")
-eisbn = File.read("#{html_file}").scan(/ISBN\s*.+\s*\(e-book\)\s*<\/p>/).to_s.gsub(/-/,"").gsub(/ISBN\s*/,"").gsub(/\s*\(e-book\)\s*/,"").gsub(/<\/p>/,"").gsub(/\["/,"").gsub(/"\]/,"")
+eisbn_basestring = File.read("#{html_file}").scan(/ISBN\s*.+\s*\(e-book\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+eisbn = eisbn_basestring.scan(/\d+\(ebook\)/).to_s.gsub(/\(ebook\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
 book_title = File.read("#{html_file}").scan(/<h1 class="TitlepageBookTitletit">.+?<\/h1>/).to_s.gsub(/<h1 class="TitlepageBookTitletit">/,"").gsub(/<\/h1>/,"").gsub(/\["/,"").gsub(/"\]/,"")
 book_subtitle = File.read("#{html_file}").scan(/<p class="TitlepageBookSubtitlestit">.+?<\/p>/).to_s.gsub(/<p class="TitlepageBookSubtitlestit">/,"").gsub(/<\/p>/,"").gsub(/\["/,"").gsub(/"\]/,"")
 
