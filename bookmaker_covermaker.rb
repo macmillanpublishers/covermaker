@@ -27,12 +27,28 @@ template_html = "S:\\resources\\covermaker\\html\\#{project_dir}\\template.html"
 css_file = File.read("S:\\resources\\covermaker\\css\\#{project_dir}\\cover.css").to_s
 
 # pulling cover metadata from html file
-authorname1 = File.read("#{html_file}").scan(/<p class="TitlepageAuthorNameau">.*?<\/p>/).join(",")
-book_author = authorname1.gsub(/<p class="TitlepageAuthorNameau">/,"").gsub(/<\/p>/,"")
 eisbn_basestring = File.read("#{html_file}").scan(/ISBN\s*.+\s*\(e-book\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
 eisbn = eisbn_basestring.scan(/\d+\(ebook\)/).to_s.gsub(/\(ebook\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+
 book_title = File.read("#{html_file}").scan(/<h1 class="TitlepageBookTitletit">.+?<\/h1>/).to_s.gsub(/<h1 class="TitlepageBookTitletit">/,"").gsub(/<\/h1>/,"").gsub(/\["/,"").gsub(/"\]/,"")
-book_subtitle = File.read("#{html_file}").scan(/<p class="TitlepageBookSubtitlestit">.+?<\/p>/).to_s.gsub(/<p class="TitlepageBookSubtitlestit">/,"").gsub(/<\/p>/,"").gsub(/\["/,"").gsub(/"\]/,"")
+
+book_author_basestring = File.read("#{html_file}").scan(/<p class="TitlepageAuthorNameau">.*?<\/p>/)
+
+if book_author_basestring.any?
+  authorname1 = File.read("#{html_file}").scan(/<p class="TitlepageAuthorNameau">.*?<\/p>/).join(",")
+  book_author = authorname1.gsub(/<p class="TitlepageAuthorNameau">/,"").gsub(/<\/p>/,"")
+else
+  authorname1 = " "
+  book_author = " "
+end
+
+book_subtitle_basestring = File.read("#{html_file}").scan(/<p class="TitlepageBookSubtitlestit">.+?<\/p>/)
+
+if book_subtitle_basestring.any?
+  book_subtitle = book_subtitle_basestring.pop.to_s.gsub(/<p class="TitlepageBookSubtitlestit">/,"").gsub(/<\/p>/,"").gsub(/\["/,"").gsub(/"\]/,"")
+else
+  book_subtitle = " "
+end
 
 # inserts the css into the head of the html
 pdf_html = File.read("#{template_html}").to_s.gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}")
