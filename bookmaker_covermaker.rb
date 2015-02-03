@@ -72,3 +72,44 @@ end
 
 # convert to jpg
 `convert -density 150 #{coverdir}\\cover.pdf -quality 100 -sharpen 0x1.0 -resize 600 #{coverdir}\\cover.jpg`
+
+# TESTING
+
+# title should exist
+test_title_chars = book_title.scan(/[a-z]/)
+test_title_nums = book_title.scan(/[1-9]/)
+
+if test_title_chars.length != 0 or test_title_nums.length != 0
+  test_title_status = "pass: title is composed of one or more letters or numbers"
+else
+  test_title_status = "FAIL: title is composed of one or more letters or numbers"
+end
+
+# author name should be text or blank space
+# subtitle should be text or blank space
+
+# pdf should exist and have file size > 0
+test_pdf_size = File.size("#{coverdir}\\cover.pdf")
+
+if test_pdf_size != 0
+  test_filesize_status = "pass: cover pdf appears to have content"
+else
+  test_filesize_status = "FAIL: cover pdf appears to have content"
+end
+
+# cover jpg should exist in tmp dir
+if File.file?("#{coverdir}\\cover.jpg")
+  test_jpg_status = "pass: The cover jpg was successfully created"
+else
+  test_jpg_status = "FAIL: The cover jpg was successfully created"
+end
+
+# cover jpg should be 600px wide
+
+# Printing the test results to the log file
+File.open("S:\\resources\\logs\\#{filename}.txt", 'a+') do |f|
+  f.puts "COVERMAKER PROCESSES"
+  f.puts test_title_status
+  f.puts test_filesize_status
+  f.puts test_jpg_status
+end
