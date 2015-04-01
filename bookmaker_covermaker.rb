@@ -26,10 +26,20 @@ coverdir = "#{tmp_dir}\\#{filename}\\images\\"
 html_file = "#{tmp_dir}\\#{filename}\\outputtmp.html"
 
 # template html file
-template_html = "S:\\resources\\covermaker\\html\\#{project_dir}\\template.html"
+if File.file?("S:\\resources\\covermaker\\html\\#{project_dir}\\template.html")
+  template_html = "S:\\resources\\covermaker\\html\\#{project_dir}\\template.html"
+else
+  template_html = "S:\\resources\\covermaker\\html\\egalley_SMP\\template.html"
+end
 
 # pdf css to be added to the file that will be sent to docraptor
-css_file = File.read("S:\\resources\\covermaker\\css\\#{project_dir}\\cover.css").to_s
+if File.file?("S:\\resources\\covermaker\\css\\#{project_dir}\\cover.css")
+  cover_css_file = "S:\\resources\\covermaker\\css\\#{project_dir}\\cover.css"
+else
+  cover_css_file = "S:\\resources\\covermaker\\css\\egalley_SMP\\cover.css"
+end
+
+css_file = File.read("#{cover_css_file}").to_s
 
 # testing to see if ISBN style exists
 spanisbn = File.read("#{html_file}").scan(/spanISBNisbn/)
