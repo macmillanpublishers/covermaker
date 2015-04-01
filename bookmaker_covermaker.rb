@@ -21,7 +21,7 @@ currvol = currpath.split("\\").shift
 
 # set working dir based on current volume
 tmp_dir = "#{currvol}\\bookmaker_tmp"
-coverdir = "#{tmp_dir}\\#{filename}\\"
+coverdir = "#{tmp_dir}\\#{filename}\\images\\"
 
 html_file = "#{tmp_dir}\\#{filename}\\outputtmp.html"
 
@@ -31,9 +31,31 @@ template_html = "S:\\resources\\covermaker\\html\\#{project_dir}\\template.html"
 # pdf css to be added to the file that will be sent to docraptor
 css_file = File.read("S:\\resources\\covermaker\\css\\#{project_dir}\\cover.css").to_s
 
+# testing to see if ISBN style exists
+spanisbn = File.read("#{html_file}").scan(/spanISBNisbn/)
+
+# determining print isbn
+if spanisbn.length != 0
+  pisbn_basestring = File.read("#{html_file}").match(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback))\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  pisbn = pisbn_basestring.match(/\d+<\/span>\(((hardcover)|(trade\s*paperback))\)/).to_s.gsub(/<\/span>\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+else
+  pisbn_basestring = File.read("#{html_file}").match(/ISBN\s*.+\s*\(((hardcover)|(trade\s*paperback))\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  pisbn = pisbn_basestring.match(/\d+\(.*\)/).to_s.gsub(/\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+end
+
 # pulling cover metadata from html file
 eisbn_basestring = File.read("#{html_file}").scan(/ISBN\s*.+\s*\(e-book\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
 eisbn = eisbn_basestring.scan(/\d+\(ebook\)/).to_s.gsub(/\(ebook\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+
+# just in case no isbn is found
+if eisbn.length == 0
+  eisbn = "#{filename}"
+end
+
+# just in case no isbn is found
+if pisbn.length == 0
+  pisbn = "#{eisbn}"
+end
 
 book_title = File.read("#{html_file}").scan(/<h1 class="TitlepageBookTitletit">.+?<\/h1>/).to_s.gsub(/<h1 class="TitlepageBookTitletit">/,"").gsub(/<\/h1>/,"").gsub(/\["/,"").gsub(/"\]/,"")
 
@@ -76,7 +98,7 @@ File.open("#{coverdir}\\cover.pdf", "w+b") do |f|
 end
 
 # convert to jpg
-`convert -density 150 #{coverdir}\\cover.pdf -quality 100 -sharpen 0x1.0 -resize 600 #{coverdir}\\cover.jpg`
+`convert -density 150 #{coverdir}\\cover.pdf -quality 100 -sharpen 0x1.0 -resize 600 #{coverdir}\\#{pisbn}_FC.jpg`
 
 # TESTING
 
