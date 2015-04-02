@@ -135,7 +135,7 @@ else
 end
 
 # cover jpg should exist in tmp dir
-if File.file?("#{coverdir}\\cover.jpg")
+if File.file?("#{coverdir}\\#{pisbn}_FC.jpg")
   test_jpg_status = "pass: The cover jpg was successfully created"
 else
   test_jpg_status = "FAIL: The cover jpg was successfully created"
