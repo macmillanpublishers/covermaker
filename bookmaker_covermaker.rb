@@ -88,17 +88,17 @@ ftp_pass = File.read("#{bookmaker_dir}\\bookmaker_authkeys\\ftp_pass.txt")
 DocRaptor.api_key "#{docraptor_key}"
 
 # template html file
-if File.file?("S:\\resources\\covermaker\\html\\#{project_dir}\\template.html")
-  template_html = "S:\\resources\\covermaker\\html\\#{project_dir}\\template.html"
+if File.file?("#{bookmaker_dir}\\covermaker\\html\\#{project_dir}\\template.html")
+  template_html = "#{bookmaker_dir}\\covermaker\\html\\#{project_dir}\\template.html"
 else
-  template_html = "S:\\resources\\covermaker\\html\\egalley_SMP\\template.html"
+  template_html = "#{bookmaker_dir}\\covermaker\\html\\generic\\template.html"
 end
 
 # pdf css to be added to the file that will be sent to docraptor
-if File.file?("S:\\resources\\covermaker\\css\\#{project_dir}\\cover.css")
-  cover_css_file = "S:\\resources\\covermaker\\css\\#{project_dir}\\cover.css"
+if File.file?("#{bookmaker_dir}\\covermaker\\css\\#{project_dir}\\cover.css")
+  cover_css_file = "#{bookmaker_dir}\\covermaker\\css\\#{project_dir}\\cover.css"
 else
-  cover_css_file = "S:\\resources\\covermaker\\css\\egalley_SMP\\cover.css"
+  cover_css_file = "#{bookmaker_dir}\\covermaker\\css\\generic\\cover.css"
 end
 
 css_file = File.read("#{cover_css_file}").to_s
