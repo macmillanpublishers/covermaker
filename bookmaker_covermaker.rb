@@ -94,6 +94,8 @@ ftp_pass = File.read("#{bookmaker_dir}\\bookmaker_authkeys\\ftp_pass.txt")
 
 DocRaptor.api_key "#{docraptor_key}"
 
+coverdir = "#{tmp_dir}\\#{filename}\\images\\"
+
 # template html file
 if File.file?("#{bookmaker_dir}\\covermaker\\html\\#{project_dir}\\template.html")
   template_html = "#{bookmaker_dir}\\covermaker\\html\\#{project_dir}\\template.html"
