@@ -94,6 +94,10 @@ ftp_pass = File.read("#{bookmaker_dir}\\bookmaker_authkeys\\ftp_pass.txt")
 
 DocRaptor.api_key "#{docraptor_key}"
 
+# change to DocRaptor 'test' mode when running from staging server
+testing_value = "false"
+if File.file?("C:/staging.txt") then testing_value = "true" end
+
 coverdir = "#{tmp_dir}\\#{filename}\\images\\"
 
 # template html file
@@ -143,7 +147,7 @@ File.open("#{coverdir}\\cover.pdf", "w+b") do |f|
                            :name             => "cover.pdf",
                            :document_type    => "pdf",
                            :strict			     => "none",
-                           :test             => true,
+                           :test             => "#{testing_value}",
 	                         :prince_options	 => {
 	                           :http_user		   => "#{ftp_uname}",
 	                           :http_password	 => "#{ftp_pass}"
