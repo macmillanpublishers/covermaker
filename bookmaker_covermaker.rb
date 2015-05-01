@@ -63,7 +63,7 @@ DocRaptor.api_key "#{docraptor_key}"
 testing_value = "false"
 if File.file?("C:/staging.txt") then testing_value = "true" end
 
-coverdir = "#{Bkmkr::Dir.tmp_dir}\\#{Bkmkr::Project.filename}\\images\\"
+coverdir = "#{Bkmkr::Dir.tmp_dir}\\#{Bkmkr::Project.filename}\\images"
 
 # template html file
 if File.file?("#{Bkmkr::Dir.bookmaker_dir}\\covermaker\\html\\#{Bkmkr::Project.project_dir}\\template.html")
