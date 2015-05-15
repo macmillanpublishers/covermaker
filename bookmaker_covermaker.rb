@@ -9,7 +9,7 @@ require_relative '..\\bookmaker\\header.rb'
 # out of the HTML file.
 
 # the working html file
-html_file = "#{Bkmkr::Dir.tmp_dir}\\#{Bkmkr::Project.filename}\\outputtmp.html"
+html_file = "#{Bkmkr::Paths.tmp_dir}\\#{Bkmkr::Project.filename}\\outputtmp.html"
 
 # testing to see if ISBN style exists
 spanisbn = File.read("#{html_file}").scan(/spanISBNisbn/)
@@ -53,9 +53,9 @@ end
 # to post images and other assets to the ftp for inclusion 
 # via docraptor. This auth data should be housed in 
 # separate files, as laid out in the following block.
-docraptor_key = File.read("#{Bkmkr::Dir.bookmaker_dir}\\bookmaker_authkeys\\api_key.txt")
-ftp_uname = File.read("#{Bkmkr::Dir.bookmaker_dir}\\bookmaker_authkeys\\ftp_username.txt")
-ftp_pass = File.read("#{Bkmkr::Dir.bookmaker_dir}\\bookmaker_authkeys\\ftp_pass.txt")
+docraptor_key = File.read("#{Bkmkr::Paths.bookmaker_dir}\\bookmaker_authkeys\\api_key.txt")
+ftp_uname = File.read("#{Bkmkr::Paths.bookmaker_dir}\\bookmaker_authkeys\\ftp_username.txt")
+ftp_pass = File.read("#{Bkmkr::Paths.bookmaker_dir}\\bookmaker_authkeys\\ftp_pass.txt")
 
 DocRaptor.api_key "#{docraptor_key}"
 
@@ -63,20 +63,20 @@ DocRaptor.api_key "#{docraptor_key}"
 testing_value = "false"
 if File.file?("C:/staging.txt") then testing_value = "true" end
 
-coverdir = "#{Bkmkr::Dir.tmp_dir}\\#{Bkmkr::Project.filename}\\images"
+coverdir = "#{Bkmkr::Paths.tmp_dir}\\#{Bkmkr::Project.filename}\\images"
 
 # template html file
-if File.file?("#{Bkmkr::Dir.bookmaker_dir}\\covermaker\\html\\#{Bkmkr::Project.project_dir}\\template.html")
-  template_html = "#{Bkmkr::Dir.bookmaker_dir}\\covermaker\\html\\#{Bkmkr::Project.project_dir}\\template.html"
+if File.file?("#{Bkmkr::Paths.bookmaker_dir}\\covermaker\\html\\#{Bkmkr::Project.project_dir}\\template.html")
+  template_html = "#{Bkmkr::Paths.bookmaker_dir}\\covermaker\\html\\#{Bkmkr::Project.project_dir}\\template.html"
 else
-  template_html = "#{Bkmkr::Dir.bookmaker_dir}\\covermaker\\html\\generic\\template.html"
+  template_html = "#{Bkmkr::Paths.bookmaker_dir}\\covermaker\\html\\generic\\template.html"
 end
 
 # pdf css to be added to the file that will be sent to docraptor
-if File.file?("#{Bkmkr::Dir.bookmaker_dir}\\covermaker\\css\\#{Bkmkr::Project.project_dir}\\cover.css")
-  cover_css_file = "#{Bkmkr::Dir.bookmaker_dir}\\covermaker\\css\\#{Bkmkr::Project.project_dir}\\cover.css"
+if File.file?("#{Bkmkr::Paths.bookmaker_dir}\\covermaker\\css\\#{Bkmkr::Project.project_dir}\\cover.css")
+  cover_css_file = "#{Bkmkr::Paths.bookmaker_dir}\\covermaker\\css\\#{Bkmkr::Project.project_dir}\\cover.css"
 else
-  cover_css_file = "#{Bkmkr::Dir.bookmaker_dir}\\covermaker\\css\\generic\\cover.css"
+  cover_css_file = "#{Bkmkr::Paths.bookmaker_dir}\\covermaker\\css\\generic\\cover.css"
 end
 
 css_file = File.read("#{cover_css_file}").to_s
@@ -158,7 +158,7 @@ end
 # cover jpg should be 600px wide
 
 # Printing the test results to the log file
-File.open("#{Bkmkr::Dir.log_dir}\\#{Bkmkr::Project.filename}.txt", 'a+') do |f|
+File.open("#{Bkmkr::Paths.log_dir}\\#{Bkmkr::Project.filename}.txt", 'a+') do |f|
   f.puts "----- COVERMAKER PROCESSES"
   f.puts test_title_status
   f.puts test_filesize_status
