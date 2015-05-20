@@ -1,99 +1,59 @@
 require 'rubygems'
 require 'doc_raptor'
 
-require_relative '..\\bookmaker\\header.rb'
+require_relative '../bookmaker/header.rb'
+require_relative '../bookmaker/metadata.rb'
 
-# --------------------HTML FILE DATA START--------------------
-# This block creates a variable to point to the 
-# converted HTML file, and pulls the isbn data
-# out of the HTML file.
-
-# the working html file
-html_file = "#{Bkmkr::Dir.tmp_dir}\\#{Bkmkr::Project.filename}\\outputtmp.html"
-
-# testing to see if ISBN style exists
-spanisbn = File.read("#{html_file}").scan(/spanISBNisbn/)
-multiple_isbns = File.read("#{html_file}").scan(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(e-*book))\)/)
-
-# determining print isbn
-if spanisbn.length != 0 && multiple_isbns.length != 0
-  pisbn_basestring = File.read("#{html_file}").match(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback))\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
-  pisbn = pisbn_basestring.match(/\d+<\/span>\(((hardcover)|(trade\s*paperback))\)/).to_s.gsub(/<\/span>\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
-elsif spanisbn.length != 0 && multiple_isbns.length == 0
-  pisbn_basestring = File.read("#{html_file}").match(/spanISBNisbn">\s*.+<\/span>/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
-  pisbn = pisbn_basestring.match(/\d+<\/span>/).to_s.gsub(/<\/span>/,"").gsub(/\["/,"").gsub(/"\]/,"")
-else
-  pisbn_basestring = File.read("#{html_file}").match(/ISBN\s*.+\s*\(((hardcover)|(trade\s*paperback))\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
-  pisbn = pisbn_basestring.match(/\d+\(.*\)/).to_s.gsub(/\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
-end
-
-# determining ebook isbn
-if spanisbn.length != 0 && multiple_isbns.length != 0
-  eisbn_basestring = File.read("#{html_file}").match(/spanISBNisbn">\s*.+<\/span>\s*\(e-*book\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
-  eisbn = eisbn_basestring.match(/\d+<\/span>\(ebook\)/).to_s.gsub(/<\/span>\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
-elsif spanisbn.length != 0 && multiple_isbns.length == 0
-  eisbn_basestring = File.read("#{html_file}").match(/spanISBNisbn">\s*.+<\/span>/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
-  eisbn = pisbn_basestring.match(/\d+<\/span>/).to_s.gsub(/<\/span>/,"").gsub(/\["/,"").gsub(/"\]/,"")
-else
-  eisbn_basestring = File.read("#{html_file}").match(/ISBN\s*.+\s*\(e-*book\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
-  eisbn = eisbn_basestring.match(/\d+\(ebook\)/).to_s.gsub(/\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
-end
-
-# just in case no isbn is found
-if pisbn.length == 0
-  pisbn = "#{Bkmkr::Project.filename}"
-end
-
-if eisbn.length == 0
-  eisbn = "#{Bkmkr::Project.filename}"
-end
-# --------------------HTML FILE DATA END--------------------
+# Local path var(s)
+pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
+pdfmaker_dir = File.join(Bkmkr::Paths.bookmaker_dir, "bookmaker_pdfmaker")
 
 # Authentication data is required to use docraptor and 
 # to post images and other assets to the ftp for inclusion 
 # via docraptor. This auth data should be housed in 
 # separate files, as laid out in the following block.
-docraptor_key = File.read("#{Bkmkr::Dir.bookmaker_dir}\\bookmaker_authkeys\\api_key.txt")
-ftp_uname = File.read("#{Bkmkr::Dir.bookmaker_dir}\\bookmaker_authkeys\\ftp_username.txt")
-ftp_pass = File.read("#{Bkmkr::Dir.bookmaker_dir}\\bookmaker_authkeys\\ftp_pass.txt")
+docraptor_key = File.read("#{Bkmkr::Paths.bookmaker_dir}/bookmaker_authkeys/api_key.txt")
+ftp_uname = File.read("#{Bkmkr::Paths.bookmaker_dir}/bookmaker_authkeys/ftp_username.txt")
+ftp_pass = File.read("#{Bkmkr::Paths.bookmaker_dir}/bookmaker_authkeys/ftp_pass.txt")
+ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
 
 DocRaptor.api_key "#{docraptor_key}"
 
 # change to DocRaptor 'test' mode when running from staging server
 testing_value = "false"
-if File.file?("C:/staging.txt") then testing_value = "true" end
+if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "true" end
 
-coverdir = "#{Bkmkr::Dir.tmp_dir}\\#{Bkmkr::Project.filename}\\images"
+coverdir = File.join(Bkmkr::Paths.tmp_dir, Bkmkr::Project.filename, "images")
 
 # template html file
-if File.file?("#{Bkmkr::Dir.bookmaker_dir}\\covermaker\\html\\#{Bkmkr::Project.project_dir}\\template.html")
-  template_html = "#{Bkmkr::Dir.bookmaker_dir}\\covermaker\\html\\#{Bkmkr::Project.project_dir}\\template.html"
+if File.file?("#{Bkmkr::Paths.bookmaker_dir}/covermaker/html/#{Bkmkr::Project.project_dir}/template.html")
+  template_html = "#{Bkmkr::Paths.bookmaker_dir}/covermaker/html/#{Bkmkr::Project.project_dir}/template.html"
 else
-  template_html = "#{Bkmkr::Dir.bookmaker_dir}\\covermaker\\html\\generic\\template.html"
+  template_html = "#{Bkmkr::Paths.bookmaker_dir}/covermaker/html/generic/template.html"
 end
 
 # pdf css to be added to the file that will be sent to docraptor
-if File.file?("#{Bkmkr::Dir.bookmaker_dir}\\covermaker\\css\\#{Bkmkr::Project.project_dir}\\cover.css")
-  cover_css_file = "#{Bkmkr::Dir.bookmaker_dir}\\covermaker\\css\\#{Bkmkr::Project.project_dir}\\cover.css"
+if File.file?("#{Bkmkr::Paths.bookmaker_dir}/covermaker/css/#{Bkmkr::Project.project_dir}/cover.css")
+  cover_css_file = "#{Bkmkr::Paths.bookmaker_dir}/covermaker/css/#{Bkmkr::Project.project_dir}/cover.css"
 else
-  cover_css_file = "#{Bkmkr::Dir.bookmaker_dir}\\covermaker\\css\\generic\\cover.css"
+  cover_css_file = "#{Bkmkr::Paths.bookmaker_dir}/covermaker/css/generic/cover.css"
 end
 
 css_file = File.read("#{cover_css_file}").to_s
 
-book_title = File.read("#{html_file}").scan(/<h1 class="TitlepageBookTitletit">.+?<\/h1>/).to_s.gsub(/<h1 class="TitlepageBookTitletit">/,"").gsub(/<\/h1>/,"").gsub(/\["/,"").gsub(/"\]/,"")
+book_title = File.read(Bkmkr::Paths.outputtmp_html).scan(/<h1 class="TitlepageBookTitletit">.+?<\/h1>/).to_s.gsub(/<h1 class="TitlepageBookTitletit">/,"").gsub(/<\/h1>/,"").gsub(/\["/,"").gsub(/"\]/,"")
 
-book_author_basestring = File.read("#{html_file}").scan(/<p class="TitlepageAuthorNameau">.*?<\/p>/)
+book_author_basestring = File.read(Bkmkr::Paths.outputtmp_html).scan(/<p class="TitlepageAuthorNameau">.*?<\/p>/)
 
 if book_author_basestring.any?
-  authorname1 = File.read("#{html_file}").scan(/<p class="TitlepageAuthorNameau">.*?<\/p>/).join(",")
+  authorname1 = File.read(Bkmkr::Paths.outputtmp_html).scan(/<p class="TitlepageAuthorNameau">.*?<\/p>/).join(",")
   book_author = authorname1.gsub(/<p class="TitlepageAuthorNameau">/,"").gsub(/<\/p>/,"")
 else
   authorname1 = " "
   book_author = " "
 end
 
-book_subtitle_basestring = File.read("#{html_file}").scan(/<p class="TitlepageBookSubtitlestit">.+?<\/p>/)
+book_subtitle_basestring = File.read(Bkmkr::Paths.outputtmp_html).scan(/<p class="TitlepageBookSubtitlestit">.+?<\/p>/)
 
 if book_subtitle_basestring.any?
   book_subtitle = book_subtitle_basestring.pop.to_s.gsub(/<p class="TitlepageBookSubtitlestit">/,"").gsub(/<\/p>/,"").gsub(/\["/,"").gsub(/"\]/,"")
@@ -106,8 +66,9 @@ pdf_html = File.read("#{template_html}").to_s.gsub(/CSSFILEHERE/,"#{css_file}").
 
 # sends file to docraptor for conversion
 # currently running in test mode; remove test when css is finalized
+cover_pdf = File.join(coverdir, "cover.pdf")
 `chdir #{coverdir}`
-File.open("#{coverdir}\\cover.pdf", "w+b") do |f|
+File.open(cover_pdf, "w+b") do |f|
   f.write DocRaptor.create(:document_content => pdf_html,
                            :name             => "cover.pdf",
                            :document_type    => "pdf",
@@ -122,7 +83,8 @@ File.open("#{coverdir}\\cover.pdf", "w+b") do |f|
 end
 
 # convert to jpg
-`convert -density 150 #{coverdir}\\cover.pdf -quality 100 -sharpen 0x1.0 -resize 600 #{coverdir}\\#{pisbn}_FC.jpg`
+final_cover = File.join(coverdir, "#{Metadata.pisbn}_FC.jpg")
+`convert -density 150 #{cover_pdf} -quality 100 -sharpen 0x1.0 -resize 600 #{final_cover}`
 
 # TESTING
 
@@ -140,7 +102,7 @@ end
 # subtitle should be text or blank space
 
 # pdf should exist and have file size > 0
-test_pdf_size = File.size("#{coverdir}\\cover.pdf")
+test_pdf_size = File.size(cover_pdf)
 
 if test_pdf_size != 0
   test_filesize_status = "pass: cover pdf appears to have content"
@@ -149,7 +111,7 @@ else
 end
 
 # cover jpg should exist in tmp dir
-if File.file?("#{coverdir}\\#{pisbn}_FC.jpg")
+if File.file?(final_cover)
   test_jpg_status = "pass: The cover jpg was successfully created"
 else
   test_jpg_status = "FAIL: The cover jpg was successfully created"
@@ -158,7 +120,7 @@ end
 # cover jpg should be 600px wide
 
 # Printing the test results to the log file
-File.open("#{Bkmkr::Dir.log_dir}\\#{Bkmkr::Project.filename}.txt", 'a+') do |f|
+File.open(Bkmkr::Paths.log_file, 'a+') do |f|
   f.puts "----- COVERMAKER PROCESSES"
   f.puts test_title_status
   f.puts test_filesize_status
