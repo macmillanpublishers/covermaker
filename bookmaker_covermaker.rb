@@ -1,20 +1,20 @@
 require 'rubygems'
 require 'doc_raptor'
 
-require_relative '../bookmaker/header.rb'
-require_relative '../bookmaker/metadata.rb'
+require_relative '../bookmaker/core/header.rb'
+require_relative '../bookmaker/core/metadata.rb'
 
 # Local path var(s)
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
-pdfmaker_dir = File.join(Bkmkr::Paths.bookmaker_dir, "bookmaker_pdfmaker")
+pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
 
 # Authentication data is required to use docraptor and 
 # to post images and other assets to the ftp for inclusion 
 # via docraptor. This auth data should be housed in 
 # separate files, as laid out in the following block.
-docraptor_key = File.read("#{Bkmkr::Paths.bookmaker_dir}/bookmaker_authkeys/api_key.txt")
-ftp_uname = File.read("#{Bkmkr::Paths.bookmaker_dir}/bookmaker_authkeys/ftp_username.txt")
-ftp_pass = File.read("#{Bkmkr::Paths.bookmaker_dir}/bookmaker_authkeys/ftp_pass.txt")
+docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_key.txt")
+ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
+ftp_pass = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_pass.txt")
 ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
 
 DocRaptor.api_key "#{docraptor_key}"
@@ -26,17 +26,17 @@ if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "
 coverdir = File.join(Bkmkr::Paths.tmp_dir, Bkmkr::Project.filename, "images")
 
 # template html file
-if File.file?("#{Bkmkr::Paths.bookmaker_dir}/covermaker/html/#{Bkmkr::Project.project_dir}/template.html")
-  template_html = "#{Bkmkr::Paths.bookmaker_dir}/covermaker/html/#{Bkmkr::Project.project_dir}/template.html"
+if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{Bkmkr::Project.project_dir}/template.html")
+  template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{Bkmkr::Project.project_dir}/template.html"
 else
-  template_html = "#{Bkmkr::Paths.bookmaker_dir}/covermaker/html/generic/template.html"
+  template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/generic/template.html"
 end
 
 # pdf css to be added to the file that will be sent to docraptor
-if File.file?("#{Bkmkr::Paths.bookmaker_dir}/covermaker/css/#{Bkmkr::Project.project_dir}/cover.css")
-  cover_css_file = "#{Bkmkr::Paths.bookmaker_dir}/covermaker/css/#{Bkmkr::Project.project_dir}/cover.css"
+if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{Bkmkr::Project.project_dir}/cover.css")
+  cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{Bkmkr::Project.project_dir}/cover.css"
 else
-  cover_css_file = "#{Bkmkr::Paths.bookmaker_dir}/covermaker/css/generic/cover.css"
+  cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/generic/cover.css"
 end
 
 css_file = File.read("#{cover_css_file}").to_s
