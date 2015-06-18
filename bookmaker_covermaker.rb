@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'doc_raptor'
+require 'FileUtils'
 
 require_relative '../bookmaker/core/header.rb'
 require_relative '../bookmaker/core/metadata.rb'
@@ -92,6 +93,8 @@ end
 # convert to jpg
 final_cover = File.join(coverdir, "#{Metadata.pisbn}_FC.jpg")
 `convert -density 150 #{cover_pdf} -quality 100 -sharpen 0x1.0 -resize 600 #{final_cover}`
+
+FileUtils.rm(cover_pdf)
 
 # TESTING
 
