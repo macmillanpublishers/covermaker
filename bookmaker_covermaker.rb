@@ -8,6 +8,13 @@ require_relative '../bookmaker/core/metadata.rb'
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
 pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
 
+configfile = File.join(Bkmkr::Paths.project_tmp_dir, "config.json")
+file = File.read(configfile)
+data_hash = JSON.parse(file)
+
+# the cover filename
+project_dir = data_hash['project']
+
 # Authentication data is required to use docraptor and 
 # to post images and other assets to the ftp for inclusion 
 # via docraptor. This auth data should be housed in 
@@ -26,15 +33,15 @@ if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "
 coverdir = File.join(Bkmkr::Paths.submitted_images)
 
 # template html file
-if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{Bkmkr::Project.project_dir}/template.html")
-  template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{Bkmkr::Project.project_dir}/template.html"
+if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/template.html")
+  template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/template.html"
 else
   template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/generic/template.html"
 end
 
 # pdf css to be added to the file that will be sent to docraptor
-if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{Bkmkr::Project.project_dir}/cover.css")
-  cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{Bkmkr::Project.project_dir}/cover.css"
+if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/cover.css")
+  cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/cover.css"
 else
   cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/generic/cover.css"
 end
