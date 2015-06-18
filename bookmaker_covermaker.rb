@@ -23,7 +23,7 @@ DocRaptor.api_key "#{docraptor_key}"
 testing_value = "false"
 if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "true" end
 
-coverdir = File.join(Bkmkr::Paths.tmp_dir, Bkmkr::Project.filename, "images")
+coverdir = File.join(Bkmkr::Paths.submitted_images)
 
 # template html file
 if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{Bkmkr::Project.project_dir}/template.html")
