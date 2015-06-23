@@ -124,6 +124,5 @@ end
 File.open(Bkmkr::Paths.log_file, 'a+') do |f|
   f.puts "----- COVERMAKER PROCESSES"
   f.puts test_title_status
-  f.puts test_filesize_status
   f.puts test_jpg_status
 end
