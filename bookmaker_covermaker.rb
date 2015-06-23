@@ -111,15 +111,6 @@ end
 # author name should be text or blank space
 # subtitle should be text or blank space
 
-# pdf should exist and have file size > 0
-test_pdf_size = File.size(cover_pdf)
-
-if test_pdf_size != 0
-  test_filesize_status = "pass: cover pdf appears to have content"
-else
-  test_filesize_status = "FAIL: cover pdf appears to have content"
-end
-
 # cover jpg should exist in tmp dir
 if File.file?(final_cover)
   test_jpg_status = "pass: The cover jpg was successfully created"
