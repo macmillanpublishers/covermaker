@@ -31,7 +31,7 @@ DocRaptor.api_key "#{docraptor_key}"
 testing_value = "false"
 if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "true" end
 
-coverdir = File.join(Bkmkr::Paths.submitted_images)
+coverdir = Bkmkr::Paths.submitted_images
 
 # template html file
 if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/template.html")
@@ -75,7 +75,7 @@ pdf_html = File.read("#{template_html}").to_s.gsub(/CSSFILEHERE/,"#{css_file}").
 # sends file to docraptor for conversion
 # currently running in test mode; remove test when css is finalized
 cover_pdf = File.join(coverdir, "cover.pdf")
-`chdir #{coverdir}`
+FileUtils.cd(coverdir)
 File.open(cover_pdf, "w+b") do |f|
   f.write DocRaptor.create(:document_content => pdf_html,
                            :name             => "cover.pdf",
