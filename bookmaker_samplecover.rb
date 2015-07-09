@@ -38,6 +38,5 @@ end
 # Printing the test results to the log file
 File.open(Bkmkr::Paths.log_file, 'a+') do |f|
   f.puts "----- COVERMAKER PROCESSES"
-  f.puts test_title_status
   f.puts test_jpg_status
 end
