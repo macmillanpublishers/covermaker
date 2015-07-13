@@ -18,7 +18,7 @@ coverdir = Bkmkr::Paths.submitted_images
 overlay = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "images", "sample", "overlay.png")
 coverfile = File.join(coverdir, Metadata.frontcover)
 
-final_cover = File.join(coverdir, "#{Metadata.pisbn}_FC.jpg")
+final_cover = File.join(coverdir, Metadata.frontcover)
 
 # create cover with overlay
 `composite -gravity SouthWest #{overlay} #{coverfile} #{final_cover}`

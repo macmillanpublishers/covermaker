@@ -34,14 +34,18 @@ if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "
 coverdir = Bkmkr::Paths.submitted_images
 
 # template html file
-if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/template.html")
+if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/#{stage_dir}.html")
+  template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/#{stage_dir}.html"
+elsif File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/template.html")
   template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/template.html"
 else
   template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/generic/template.html"
 end
 
 # pdf css to be added to the file that will be sent to docraptor
-if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/cover.css")
+if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/#{stage_dir}.css")
+  cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/#{stage_dir}.css"
+elsif File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/cover.css")
   cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/cover.css"
 else
   cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/generic/cover.css"
@@ -91,7 +95,7 @@ File.open(cover_pdf, "w+b") do |f|
 end
 
 # convert to jpg
-final_cover = File.join(coverdir, "#{Metadata.pisbn}_FC.jpg")
+final_cover = File.join(coverdir, Metadata.frontcover)
 `convert -density 150 #{cover_pdf} -quality 100 -sharpen 0x1.0 -resize 600 #{final_cover}`
 
 FileUtils.rm(cover_pdf)
