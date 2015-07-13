@@ -15,6 +15,7 @@ data_hash = JSON.parse(file)
 
 # the cover filename
 project_dir = data_hash['project']
+project_dir = data_hash['stage']
 
 # Authentication data is required to use docraptor and 
 # to post images and other assets to the ftp for inclusion 
