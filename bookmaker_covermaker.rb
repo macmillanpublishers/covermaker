@@ -97,7 +97,7 @@ end
 
 # convert to jpg
 final_cover = File.join(coverdir, Metadata.frontcover)
-`convert -density 150 "#{cover_pdf}"" -quality 100 -sharpen 0x1.0 -resize 600 "#{final_cover}"`
+`convert -density 150 "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 "#{final_cover}"`
 
 FileUtils.rm(cover_pdf)
 
