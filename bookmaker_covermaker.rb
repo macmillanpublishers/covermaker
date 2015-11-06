@@ -58,7 +58,11 @@ book_title = Metadata.booktitle
 
 book_author = Metadata.bookauthor
 
-book_subtitle = Metadata.booksubtitle
+if Metadata.booksubtitle == "Unknown"
+  book_subtitle = ""
+else
+  book_subtitle = Metadata.booksubtitle
+end
 
 # inserts the css into the head of the html
 pdf_html = File.read("#{template_html}").to_s.gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}")
