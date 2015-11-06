@@ -1,3 +1,45 @@
+@font-face {
+	font-family: "ArnoPro";
+	src: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerfonts/ArnoPro-Regular.otf');
+	font-style: normal;
+	font-weight: normal;
+}
+
+@font-face {
+	font-family: "ArnoPro";
+	src: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerfonts/ArnoPro-Bold.otf');
+	font-style: normal;
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "ArnoPro";
+	src: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerfonts/ArnoPro-Italic.otf');
+	font-style: italic;
+	font-weight: normal;
+}
+
+@font-face {
+	font-family: "ArnoPro";
+	src: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerfonts/ArnoPro-BoldItalic.otf');
+	font-style: italic;
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "ArnoPro";
+	src: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerfonts/ArnoPro-Smbd.otf');
+	font-style: normal;
+	font-weight: 600;
+}
+
+@font-face {
+	font-family: "ArnoPro";
+	src: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerfonts/ArnoPro-LightDisplay.otf');
+	font-style: normal;
+	font-weight: 100;
+}
+
 @page {
 	size: 5.5in 8.5in;
 	margin: 0.3in;
@@ -41,6 +83,10 @@
 	  background-color: #e7d49e;
 	  content: " ";
 	}
+}
+
+body {
+	font-family: "ArnoPro";
 }
 
 div {
