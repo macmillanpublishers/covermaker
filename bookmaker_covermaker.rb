@@ -83,7 +83,7 @@ end
 
 embedjs = File.read(pdf_js_file).to_s
 
-pdf_html = File.read(Bkmkr::Paths.outputtmp_html).gsub(/<\/head>/,"<script>#{embedjs}</script><style>#{embedcss}</style></head>").to_s
+pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script><style>#{embedcss}</style></head>").to_s
 
 # inserts the css into the head of the html
 #pdf_html = File.read("#{template_html}").gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}").to_s
