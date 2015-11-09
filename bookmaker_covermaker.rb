@@ -4,6 +4,7 @@ require 'fileutils'
 
 require_relative '../bookmaker/core/header.rb'
 require_relative '../bookmaker/core/metadata.rb'
+require_relative '../utilities/oraclequery.rb'
 
 # Local path var(s)
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
