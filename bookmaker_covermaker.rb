@@ -54,22 +54,22 @@ end
 
 css_file = File.read("#{cover_css_file}").to_s
 
-book_title = Metadata.booktitle
+book_title = Metadata.booktitle.to_s
 
-book_author = Metadata.bookauthor
+book_author = Metadata.bookauthor.to_s
 
 if Metadata.booksubtitle == "Unknown"
   book_subtitle = ""
 else
-  book_subtitle = Metadata.booksubtitle
+  book_subtitle = Metadata.booksubtitle.to_s
 end
 
 # inserts the css into the head of the html
-pdf_html = File.read("#{template_html}").to_s.gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}").to_s
+pdf_html = File.read("#{template_html}").gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}").to_s
 
 test_cover_html = File.join(coverdir, "cover.html")
 File.open(test_cover_html, "w") do |cover|
-  cover.write pdf_html
+  cover.puts pdf_html
 end
 
 # sends file to docraptor for conversion
