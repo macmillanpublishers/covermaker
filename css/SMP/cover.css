@@ -98,7 +98,7 @@ div {
 	height: 7.43in;
 }
 
-h1.header {
+h1.chaptitle {
 	font-family: "ArnoPro";
 	font-weight: bold;
 	font-size: 0.33in;
@@ -115,7 +115,7 @@ p.copyright {
 	padding: 0;
 }
 
-h1.title {
+h1#booktitle {
 	font-family: "ArnoPro";
 	font-weight: normal;
 	text-transform: uppercase;
@@ -124,7 +124,7 @@ h1.title {
 	padding: 0;
 }
 
-h2.subtitle {
+h2#booksubtitle {
 	font-family: "ArnoPro";
 	font-weight: normal;
 	text-transform: uppercase;
@@ -133,7 +133,7 @@ h2.subtitle {
 	padding: 0;
 }
 
-p.byline {
+p#bookauthor {
 	font-family: "ArnoPro";
 	font-weight: normal;
 	text-transform: uppercase;
