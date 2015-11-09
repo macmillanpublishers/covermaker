@@ -54,18 +54,18 @@ end
 
 css_file = File.read("#{cover_css_file}").to_s
 
-book_title = Metadata.booktitle.encode('utf-8')
+book_title = Metadata.booktitle
 
-book_author = Metadata.bookauthor.encode('utf-8')
+book_author = Metadata.bookauthor
 
 if Metadata.booksubtitle == "Unknown"
   book_subtitle = ""
 else
-  book_subtitle = Metadata.booksubtitle.encode('utf-8')
+  book_subtitle = Metadata.booksubtitle
 end
 
 # inserts the css into the head of the html
-pdf_html = File.read("#{template_html}", :encoding=>"UTF-8").gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}")
+pdf_html = File.read("#{template_html}").encode('utf-8').gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}")
 
 test_cover_html = File.join(coverdir, "cover.html")
 File.open(test_cover_html, "w") do |cover|
