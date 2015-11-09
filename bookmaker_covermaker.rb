@@ -65,14 +65,14 @@ end
 
 pdf_js_file = File.join(Bkmkr::Paths.project_tmp_dir, "cover.js")
 
-booktitle = Metadata.booktitle.to_s
+booktitle = Metadata.booktitle.encode('utf-8')
 
-authorname = Metadata.bookauthor.to_s
+authorname = Metadata.bookauthor.encode('utf-8')
 
 if Metadata.booksubtitle == "Unknown"
   booksubtitle = ""
 else
-  booksubtitle = Metadata.booksubtitle.to_s
+  booksubtitle = Metadata.booksubtitle.encode('utf-8')
 end
 
 FileUtils.cp(cover_js_file, pdf_js_file)
