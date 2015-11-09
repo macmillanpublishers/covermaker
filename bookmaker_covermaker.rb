@@ -65,7 +65,7 @@ else
 end
 
 # inserts the css into the head of the html
-pdf_html = File.read("#{template_html}").encode('utf-8').gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}")
+pdf_html = File.read("#{template_html}").to_s.gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}").to_s
 
 test_cover_html = File.join(coverdir, "cover.html")
 File.open(test_cover_html, "w") do |cover|
