@@ -52,7 +52,7 @@ else
   cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/generic/cover.css"
 end
 
-css_file = File.read("#{cover_css_file}").gsub(/(\\)/,"\\0\\0").to_s
+embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
 
 # pdf js to be added to the file that will be sent to docraptor
 if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/#{project_dir}/#{stage_dir}.js")
