@@ -136,7 +136,7 @@ h2.subtitle {
 p.byline {
 	font-family: "ArnoPro";
 	font-weight: normal;
-	text-transform: uppercase;
+	/*text-transform: uppercase;*/
 	font-size: 0.27in;
 	margin: 0 0 2in 0;
 	padding: 0;
