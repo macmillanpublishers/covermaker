@@ -65,14 +65,50 @@ end
 
 pdf_js_file = File.join(Bkmkr::Paths.project_tmp_dir, "cover.js")
 
-booktitle = Metadata.booktitle.encode('utf-8')
+# connect to DB for all other metadata
+test_pisbn_chars = Metadata.pisbn.scan(/\d\d\d\d\d\d\d\d\d\d\d\d\d/)
+test_pisbn_length = Metadata.pisbn.split(%r{\s*})
+test_eisbn_chars = Metadata.eisbn.scan(/\d\d\d\d\d\d\d\d\d\d\d\d\d/)
+test_eisbn_length = Metadata.eisbn.split(%r{\s*})
 
-authorname = Metadata.bookauthor.encode('utf-8')
-
-if Metadata.booksubtitle == "Unknown"
-  booksubtitle = ""
+if test_pisbn_length.length == 13 and test_pisbn_chars.length != 0
+  thissql = exactSearchSingleKey(pisbn, "EDITION_EAN")
+  myhash = runQuery(thissql)
+elsif test_eisbn_length.length == 13 and test_eisbn_chars.length != 0
+  thissql = exactSearchSingleKey(eisbn, "EDITION_EAN")
+  myhash = runQuery(thissql)
 else
-  booksubtitle = Metadata.booksubtitle.encode('utf-8')
+  myhash = {}
+end
+
+unless myhash['book'].nil? or myhash['book'].empty? or !myhash['book']
+  puts "DB Connection SUCCESS: Found a book record"
+else
+  puts "No DB record found; falling back to manuscript fields"
+end
+
+# Finding author name(s)
+if myhash['book'].nil? or myhash['book'].empty? or !myhash['book'] or myhash['book']['WORK_COVERAUTHOR'].nil? or myhash['book']['WORK_COVERAUTHOR'].empty? or !myhash['book']['WORK_COVERAUTHOR']
+  authorname = File.read(Bkmkr::Paths.outputtmp_html).scan(/<p class="TitlepageAuthorNameau">.*?</).join(",").gsub(/<p class="TitlepageAuthorNameau">/,"").gsub(/</,"").gsub(/\[\]/,"")
+else
+  authorname = myhash['book']['WORK_COVERAUTHOR']
+  authorname = authorname.encode('utf-8')
+end
+
+# Finding book title
+if myhash['book'].nil? or myhash['book'].empty? or !myhash['book'] or myhash["book"]["WORK_COVERTITLE"].nil? or myhash["book"]["WORK_COVERTITLE"].empty? or !myhash["book"]["WORK_COVERTITLE"]
+  booktitle = File.read(Bkmkr::Paths.outputtmp_html).scan(/<title>.*?<\/title>/).to_s.gsub(/\["<title>/,"").gsub(/<\/title>"\]/,"").gsub(/\[\]/,"")
+else
+  booktitle = myhash["book"]["WORK_COVERTITLE"]
+  booktitle = booktitle.encode('utf-8')
+end
+
+# Finding book subtitle
+if myhash['book'].nil? or myhash['book'].empty? or !myhash['book'] or myhash["book"]["WORK_SUBTITLE"].nil? or myhash["book"]["WORK_SUBTITLE"].empty? or !myhash["book"]["WORK_SUBTITLE"]
+  booksubtitle = File.read(Bkmkr::Paths.outputtmp_html).scan(/<p class="TitlepageBookSubtitlestit">.*?</).to_s.gsub(/\["<p class=\\"TitlepageBookSubtitlestit\\">/,"").gsub(/<"\]/,"").gsub(/\[\]/,"")
+else
+  booksubtitle = myhash["book"]["WORK_SUBTITLE"]
+  booksubtitle = booksubtitle.encode('utf-8')
 end
 
 FileUtils.cp(cover_js_file, pdf_js_file)
