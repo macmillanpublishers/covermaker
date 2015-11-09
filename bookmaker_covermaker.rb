@@ -120,8 +120,8 @@ FileUtils.rm(cover_pdf)
 # TESTING
 
 # title should exist
-test_title_chars = book_title.scan(/[a-z]/)
-test_title_nums = book_title.scan(/[1-9]/)
+test_title_chars = booktitle.scan(/[a-z]/)
+test_title_nums = booktitle.scan(/[1-9]/)
 
 if test_title_chars.length != 0 or test_title_nums.length != 0
   test_title_status = "pass: title is composed of one or more letters or numbers"
