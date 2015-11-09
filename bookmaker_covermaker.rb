@@ -52,20 +52,41 @@ else
   cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/generic/cover.css"
 end
 
-css_file = File.read("#{cover_css_file}").to_s
+css_file = File.read("#{cover_css_file}").gsub(/(\\)/,"\\0\\0").to_s
 
-book_title = Metadata.booktitle.to_s
-
-book_author = Metadata.bookauthor.to_s
-
-if Metadata.booksubtitle == "Unknown"
-  book_subtitle = ""
+# pdf js to be added to the file that will be sent to docraptor
+if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/#{project_dir}/#{stage_dir}.js")
+  cover_js_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/#{project_dir}/#{stage_dir}.js"
+elsif File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/#{project_dir}/cover.js")
+  cover_js_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/#{project_dir}/cover.js"
 else
-  book_subtitle = Metadata.booksubtitle.to_s
+  cover_js_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/generic/cover.js"
 end
 
+pdf_js_file = File.join(Bkmkr::Paths.project_tmp_dir, "cover.js")
+
+booktitle = Metadata.booktitle.to_s
+
+authorname = Metadata.bookauthor.to_s
+
+if Metadata.booksubtitle == "Unknown"
+  booksubtitle = ""
+else
+  booksubtitle = Metadata.booksubtitle.to_s
+end
+
+FileUtils.cp(cover_js_file, pdf_js_file)
+jscontents = File.read(pdf_js_file).gsub(/BKMKRINSERTBKTITLE/,"\"#{booktitle}\"").gsub(/BKMKRINSERTBKSUBTITLE/,"\"#{booksubtitle}\"").gsub(/BKMKRINSERTBKAUTHOR/,"\"#{authorname}\"")
+File.open(pdf_js_file, 'w') do |output| 
+  output.write jscontents
+end
+
+embedjs = File.read(pdf_js_file).to_s
+
+pdf_html = File.read(Bkmkr::Paths.outputtmp_html).gsub(/<\/head>/,"<script>#{embedjs}</script><style>#{embedcss}</style></head>").to_s
+
 # inserts the css into the head of the html
-pdf_html = File.read("#{template_html}").gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}").to_s
+#pdf_html = File.read("#{template_html}").gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}").to_s
 
 test_cover_html = File.join(coverdir, "cover.html")
 File.open(test_cover_html, "w") do |cover|
