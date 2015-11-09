@@ -54,14 +54,14 @@ end
 
 css_file = File.read("#{cover_css_file}").to_s
 
-book_title = Metadata.booktitle.to_s
+book_title = Metadata.booktitle.encode('utf-8')
 
-book_author = Metadata.bookauthor.to_s
+book_author = Metadata.bookauthor.encode('utf-8')
 
 if Metadata.booksubtitle == "Unknown"
   book_subtitle = ""
 else
-  book_subtitle = Metadata.booksubtitle.to_s
+  book_subtitle = Metadata.booksubtitle.encode('utf-8')
 end
 
 # inserts the css into the head of the html
