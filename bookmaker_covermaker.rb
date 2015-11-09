@@ -72,10 +72,10 @@ test_eisbn_chars = Metadata.eisbn.scan(/\d\d\d\d\d\d\d\d\d\d\d\d\d/)
 test_eisbn_length = Metadata.eisbn.split(%r{\s*})
 
 if test_pisbn_length.length == 13 and test_pisbn_chars.length != 0
-  thissql = exactSearchSingleKey(pisbn, "EDITION_EAN")
+  thissql = exactSearchSingleKey(Metadata.pisbn, "EDITION_EAN")
   myhash = runQuery(thissql)
 elsif test_eisbn_length.length == 13 and test_eisbn_chars.length != 0
-  thissql = exactSearchSingleKey(eisbn, "EDITION_EAN")
+  thissql = exactSearchSingleKey(Metadata.eisbn, "EDITION_EAN")
   myhash = runQuery(thissql)
 else
   myhash = {}
@@ -89,7 +89,7 @@ end
 
 # Finding author name(s)
 if myhash['book'].nil? or myhash['book'].empty? or !myhash['book'] or myhash['book']['WORK_COVERAUTHOR'].nil? or myhash['book']['WORK_COVERAUTHOR'].empty? or !myhash['book']['WORK_COVERAUTHOR']
-  authorname = File.read(Bkmkr::Paths.outputtmp_html).scan(/<p class="TitlepageAuthorNameau">.*?</).join(",").gsub(/<p class="TitlepageAuthorNameau">/,"").gsub(/</,"").gsub(/\[\]/,"")
+  authorname = Metadata.bookauthor
 else
   authorname = myhash['book']['WORK_COVERAUTHOR']
   authorname = authorname.encode('utf-8')
@@ -97,7 +97,7 @@ end
 
 # Finding book title
 if myhash['book'].nil? or myhash['book'].empty? or !myhash['book'] or myhash["book"]["WORK_COVERTITLE"].nil? or myhash["book"]["WORK_COVERTITLE"].empty? or !myhash["book"]["WORK_COVERTITLE"]
-  booktitle = File.read(Bkmkr::Paths.outputtmp_html).scan(/<title>.*?<\/title>/).to_s.gsub(/\["<title>/,"").gsub(/<\/title>"\]/,"").gsub(/\[\]/,"")
+  booktitle = Metadata.booktitle
 else
   booktitle = myhash["book"]["WORK_COVERTITLE"]
   booktitle = booktitle.encode('utf-8')
@@ -105,7 +105,7 @@ end
 
 # Finding book subtitle
 if myhash['book'].nil? or myhash['book'].empty? or !myhash['book'] or myhash["book"]["WORK_SUBTITLE"].nil? or myhash["book"]["WORK_SUBTITLE"].empty? or !myhash["book"]["WORK_SUBTITLE"]
-  booksubtitle = File.read(Bkmkr::Paths.outputtmp_html).scan(/<p class="TitlepageBookSubtitlestit">.*?</).to_s.gsub(/\["<p class=\\"TitlepageBookSubtitlestit\\">/,"").gsub(/<"\]/,"").gsub(/\[\]/,"")
+  booksubtitle = Metadata.booksubtitle
 else
   booksubtitle = myhash["book"]["WORK_SUBTITLE"]
   booksubtitle = booksubtitle.encode('utf-8')
