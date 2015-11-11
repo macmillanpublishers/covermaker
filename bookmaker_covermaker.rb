@@ -112,6 +112,10 @@ else
   booksubtitle = booksubtitle.encode('utf-8')
 end
 
+if booksubtitle == "Unknown"
+	booksubtitle = " "
+end
+
 FileUtils.cp(cover_js_file, pdf_js_file)
 jscontents = File.read(pdf_js_file).gsub(/BKMKRINSERTBKTITLE/,"#{booktitle}").gsub(/BKMKRINSERTBKSUBTITLE/,"#{booksubtitle}").gsub(/BKMKRINSERTBKAUTHOR/,"#{authorname}")
 File.open(pdf_js_file, 'w') do |output| 
@@ -141,9 +145,9 @@ File.open(cover_pdf, "w+b") do |f|
                            :strict			     => "none",
                            :test             => "#{testing_value}",
 	                         :prince_options	 => {
-	                           :http_user		   => "#{ftp_uname}",
+	                           :http_user		 => "#{ftp_uname}",
 	                           :http_password	 => "#{ftp_pass}",
-                             :javascript     => "true"
+                               :javascript       => "true"
 							             }
                        		)
                            
