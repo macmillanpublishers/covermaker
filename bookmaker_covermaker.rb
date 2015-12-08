@@ -129,10 +129,10 @@ pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script>
 # inserts the css into the head of the html
 #pdf_html = File.read("#{template_html}").gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}").to_s
 
-test_cover_html = File.join(coverdir, "cover.html")
-File.open(test_cover_html, "w") do |cover|
-  cover.puts pdf_html
-end
+# test_cover_html = File.join(coverdir, "cover.html")
+# File.open(test_cover_html, "w") do |cover|
+#   cover.puts pdf_html
+# end
 
 # sends file to docraptor for conversion
 # currently running in test mode; remove test when css is finalized
@@ -145,8 +145,8 @@ File.open(cover_pdf, "w+b") do |f|
                            :strict			     => "none",
                            :test             => "#{testing_value}",
 	                         :prince_options	 => {
-	                           :http_user		 => "#{ftp_uname}",
-	                           :http_password	 => "#{ftp_pass}",
+	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
+	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
                                :javascript       => "true"
 							             }
                        		)

@@ -10,13 +10,8 @@ require_relative '../utilities/oraclequery.rb'
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
 pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
 
-configfile = File.join(Bkmkr::Paths.project_tmp_dir, "config.json")
-file = File.read(configfile)
-data_hash = JSON.parse(file)
-
-# the cover filename
-project_dir = data_hash['project']
-stage_dir = data_hash['stage']
+project_dir = Bkmkr::Project.input_file.split(Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact))[0...-2].pop.to_s.split("_").shift
+stage_dir = Bkmkr::Project.input_file.split(Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact))[0...-2].pop.to_s.split("_").pop
 
 # Authentication data is required to use docraptor and 
 # to post images and other assets to the ftp for inclusion 
@@ -27,7 +22,43 @@ ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_userna
 ftp_pass = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_pass.txt")
 ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
 
-DocRaptor.api_key "#{docraptor_key}"
+DocRaptor.api_key "#{Bkmkr::Keys.docraptor_key}"
+
+spanisbn = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn/)
+multiple_isbns = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand)|(e\s*-*\s*book))\)/)
+
+# determining print isbn
+if spanisbn.length != 0 && multiple_isbns.length != 0
+  pisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand))\)/).to_s.gsub(/-/,"").gsub(/<span class="spanISBNisbn">/, "").gsub(/<\/span>/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  pisbn = pisbn_basestring.match(/\d+\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.?on.?demand))\)/).to_s.gsub(/\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+elsif spanisbn.length != 0 && multiple_isbns.length == 0
+  pisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/spanISBNisbn">\s*.+<\/span>/).to_s.gsub(/-/,"").gsub(/<span class="spanISBNisbn">/, "").gsub(/<\/span>/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  pisbn = pisbn_basestring.match(/\d+/).to_s.gsub(/\["/,"").gsub(/"\]/,"")
+else
+  pisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/ISBN\s*.+\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand))\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  pisbn = pisbn_basestring.match(/\d+\(.*\)/).to_s.gsub(/\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+end
+
+# determining ebook isbn
+if spanisbn.length != 0 && multiple_isbns.length != 0
+  eisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/<span class="spanISBNisbn">\s*.+<\/span>\s*\(e\s*-*\s*book\)/).to_s.gsub(/-/,"").gsub(/<span class="spanISBNisbn">/, "").gsub(/<\/span>/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  eisbn = eisbn_basestring.match(/\d+\(ebook\)/).to_s.gsub(/\(ebook\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+elsif spanisbn.length != 0 && multiple_isbns.length == 0
+  eisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/spanISBNisbn">\s*.+<\/span>/).to_s.gsub(/-/,"").gsub(/<span class="spanISBNisbn">/, "").gsub(/<\/span>/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  eisbn = pisbn_basestring.match(/\d+/).to_s.gsub(/\["/,"").gsub(/"\]/,"")
+else
+  eisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/ISBN\s*.+\s*\(e-*book\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  eisbn = eisbn_basestring.match(/\d+\(ebook\)/).to_s.gsub(/\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+end
+
+# just in case no isbn is found
+if pisbn.length == 0
+  pisbn = Bkmkr::Project.filename
+end
+
+if eisbn.length == 0
+  eisbn = Bkmkr::Project.filename
+end
 
 # change to DocRaptor 'test' mode when running from staging server
 testing_value = "false"
@@ -63,16 +94,16 @@ end
 pdf_js_file = File.join(Bkmkr::Paths.project_tmp_dir, "cover.js")
 
 # connect to DB for all other metadata
-test_pisbn_chars = Metadata.pisbn.scan(/\d\d\d\d\d\d\d\d\d\d\d\d\d/)
-test_pisbn_length = Metadata.pisbn.split(%r{\s*})
-test_eisbn_chars = Metadata.eisbn.scan(/\d\d\d\d\d\d\d\d\d\d\d\d\d/)
-test_eisbn_length = Metadata.eisbn.split(%r{\s*})
+test_pisbn_chars = pisbn.scan(/\d\d\d\d\d\d\d\d\d\d\d\d\d/)
+test_pisbn_length = pisbn.split(%r{\s*})
+test_eisbn_chars = eisbn.scan(/\d\d\d\d\d\d\d\d\d\d\d\d\d/)
+test_eisbn_length = eisbn.split(%r{\s*})
 
 if test_pisbn_length.length == 13 and test_pisbn_chars.length != 0
-  thissql = exactSearchSingleKey(Metadata.pisbn, "EDITION_EAN")
+  thissql = exactSearchSingleKey(pisbn, "EDITION_EAN")
   myhash = runQuery(thissql)
 elsif test_eisbn_length.length == 13 and test_eisbn_chars.length != 0
-  thissql = exactSearchSingleKey(Metadata.eisbn, "EDITION_EAN")
+  thissql = exactSearchSingleKey(eisbn, "EDITION_EAN")
   myhash = runQuery(thissql)
 else
   myhash = {}
@@ -125,14 +156,10 @@ pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script>
 # inserts the css into the head of the html
 #pdf_html = File.read("#{template_html}").gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}").to_s
 
-test_cover_html = File.join(coverdir, "titlepage.html")
-File.open(test_cover_html, "w") do |cover|
-  cover.puts pdf_html
-end
-
 # sends file to docraptor for conversion
 # currently running in test mode; remove test when css is finalized
 cover_pdf = File.join(coverdir, "titlepage.pdf")
+
 FileUtils.cd(coverdir)
 File.open(cover_pdf, "w+b") do |f|
   f.write DocRaptor.create(:document_content => pdf_html,
@@ -141,12 +168,11 @@ File.open(cover_pdf, "w+b") do |f|
                            :strict			     => "none",
                            :test             => "#{testing_value}",
 	                         :prince_options	 => {
-	                           :http_user		 => "#{ftp_uname}",
-	                           :http_password	 => "#{ftp_pass}",
+	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
+	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
                                :javascript       => "true"
 							             }
-                       		)
-                           
+                       		)                         
 end
 
 # convert to jpg
@@ -154,7 +180,6 @@ final_cover = File.join(coverdir, "titlepage.jpg")
 `convert -density 150 "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 "#{final_cover}"`
 
 FileUtils.rm(cover_pdf)
-
 # TESTING
 
 # title should exist
