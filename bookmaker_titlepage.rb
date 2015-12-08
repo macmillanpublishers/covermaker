@@ -116,7 +116,7 @@ end
 
 # Finding author name(s)
 if myhash['book'].nil? or myhash['book'].empty? or !myhash['book'] or myhash['book']['WORK_COVERAUTHOR'].nil? or myhash['book']['WORK_COVERAUTHOR'].empty? or !myhash['book']['WORK_COVERAUTHOR']
-  authorname = Metadata.bookauthor
+  authorname = File.read(Bkmkr::Paths.outputtmp_html).scan(/<p class="TitlepageAuthorNameau">.*?</).join(", ").gsub(/<p class="TitlepageAuthorNameau">/,"").gsub(/</,"").gsub(/\[\]/,"")
 else
   authorname = myhash['book']['WORK_COVERAUTHOR']
   authorname = authorname.encode('utf-8')
@@ -124,7 +124,7 @@ end
 
 # Finding book title
 if myhash['book'].nil? or myhash['book'].empty? or !myhash['book'] or myhash["book"]["WORK_COVERTITLE"].nil? or myhash["book"]["WORK_COVERTITLE"].empty? or !myhash["book"]["WORK_COVERTITLE"]
-  booktitle = Metadata.booktitle
+  booktitle = File.read(Bkmkr::Paths.outputtmp_html).scan(/<title>.*?<\/title>/).to_s.gsub(/\["<title>/,"").gsub(/<\/title>"\]/,"").gsub(/\[\]/,"")
 else
   booktitle = myhash["book"]["WORK_COVERTITLE"]
   booktitle = booktitle.encode('utf-8')
@@ -132,7 +132,7 @@ end
 
 # Finding book subtitle
 if myhash['book'].nil? or myhash['book'].empty? or !myhash['book'] or myhash["book"]["WORK_SUBTITLE"].nil? or myhash["book"]["WORK_SUBTITLE"].empty? or !myhash["book"]["WORK_SUBTITLE"]
-  booksubtitle = Metadata.booksubtitle
+  booksubtitle = File.read(Bkmkr::Paths.outputtmp_html).scan(/<p class="TitlepageBookSubtitlestit">.*?</).to_s.gsub(/\["<p class=\\"TitlepageBookSubtitlestit\\">/,"").gsub(/<"\]/,"").gsub(/\[\]/,"")
 else
   booksubtitle = myhash["book"]["WORK_SUBTITLE"]
   booksubtitle = booksubtitle.encode('utf-8')
