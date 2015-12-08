@@ -126,16 +126,12 @@ embedjs = File.read(pdf_js_file).to_s
 
 pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script><style>#{embedcss}</style></head>").to_s
 
-# inserts the css into the head of the html
-#pdf_html = File.read("#{template_html}").gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}").to_s
-
 # test_cover_html = File.join(coverdir, "cover.html")
 # File.open(test_cover_html, "w") do |cover|
 #   cover.puts pdf_html
 # end
 
 # sends file to docraptor for conversion
-# currently running in test mode; remove test when css is finalized
 cover_pdf = File.join(coverdir, "cover.pdf")
 FileUtils.cd(coverdir)
 File.open(cover_pdf, "w+b") do |f|

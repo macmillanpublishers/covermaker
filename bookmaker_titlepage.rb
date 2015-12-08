@@ -153,11 +153,7 @@ embedjs = File.read(pdf_js_file).to_s
 
 pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script><style>#{embedcss}</style></head>").to_s
 
-# inserts the css into the head of the html
-#pdf_html = File.read("#{template_html}").gsub(/CSSFILEHERE/,"#{css_file}").gsub(/BOOKTITLE/,"#{book_title}").gsub(/BOOKSUBTITLE/,"#{book_subtitle}").gsub(/BOOKAUTHOR/,"#{book_author}").to_s
-
 # sends file to docraptor for conversion
-# currently running in test mode; remove test when css is finalized
 cover_pdf = File.join(coverdir, "titlepage.pdf")
 
 FileUtils.cd(coverdir)
@@ -181,32 +177,14 @@ final_cover = File.join(coverdir, "titlepage.jpg")
 
 FileUtils.rm(cover_pdf)
 # TESTING
-
-# title should exist
-test_title_chars = booktitle.scan(/[a-z]/)
-test_title_nums = booktitle.scan(/[1-9]/)
-
-if test_title_chars.length != 0 or test_title_nums.length != 0
-  test_title_status = "pass: title is composed of one or more letters or numbers"
-else
-  test_title_status = "FAIL: title is composed of one or more letters or numbers"
-end
-
-# author name should be text or blank space
-# subtitle should be text or blank space
-
-# cover jpg should exist in tmp dir
 if File.file?(final_cover)
-  test_jpg_status = "pass: The cover jpg was successfully created"
+  test_jpg_status = "pass: I found a titlepage image"
 else
-  test_jpg_status = "FAIL: The cover jpg was successfully created"
+  test_jpg_status = "FAIL: no titlepage image was created"
 end
-
-# cover jpg should be 600px wide
 
 # Printing the test results to the log file
 File.open(Bkmkr::Paths.log_file, 'a+') do |f|
-  f.puts "----- COVERMAKER PROCESSES"
-  f.puts test_title_status
+  f.puts "----- TITLEPAGE PROCESSES"
   f.puts test_jpg_status
 end
