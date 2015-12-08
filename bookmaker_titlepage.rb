@@ -155,26 +155,29 @@ pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script>
 # sends file to docraptor for conversion
 cover_pdf = File.join(coverdir, "titlepage.pdf")
 
-FileUtils.cd(coverdir)
-File.open(cover_pdf, "w+b") do |f|
-  f.write DocRaptor.create(:document_content => pdf_html,
-                           :name             => "titlepage.pdf",
-                           :document_type    => "pdf",
-                           :strict			     => "none",
-                           :test             => "#{testing_value}",
-	                         :prince_options	 => {
-	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
-	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
-                               :javascript       => "true"
-							             }
-                       		)                         
+final_cover = File.join(coverdir, "titlepage.jpg")
+
+unless File.file?(final_cover)
+  FileUtils.cd(coverdir)
+  File.open(cover_pdf, "w+b") do |f|
+    f.write DocRaptor.create(:document_content => pdf_html,
+                             :name             => "titlepage.pdf",
+                             :document_type    => "pdf",
+                             :strict			     => "none",
+                             :test             => "#{testing_value}",
+  	                         :prince_options	 => {
+  	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
+  	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
+                                 :javascript       => "true"
+  							             }
+                         		)                         
+  end
+  # convert to jpg
+  `convert -density 150 "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 "#{final_cover}"`
+
+  FileUtils.rm(cover_pdf)
 end
 
-# convert to jpg
-final_cover = File.join(coverdir, "titlepage.jpg")
-`convert -density 150 "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 "#{final_cover}"`
-
-FileUtils.rm(cover_pdf)
 # TESTING
 if File.file?(final_cover)
   test_jpg_status = "pass: I found a titlepage image"
