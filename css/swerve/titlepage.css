@@ -1,0 +1,130 @@
+@font-face {
+	font-family: "ArnoPro";
+	src: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerfonts/ArnoPro-Regular.otf');
+	font-style: normal;
+	font-weight: normal;
+}
+
+@font-face {
+	font-family: "ArnoPro";
+	src: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerfonts/ArnoPro-Bold.otf');
+	font-style: normal;
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "ArnoPro";
+	src: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerfonts/ArnoPro-Italic.otf');
+	font-style: italic;
+	font-weight: normal;
+}
+
+@font-face {
+	font-family: "ArnoPro";
+	src: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerfonts/ArnoPro-BoldItalic.otf');
+	font-style: italic;
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: "ArnoPro";
+	src: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerfonts/ArnoPro-Smbd.otf');
+	font-style: normal;
+	font-weight: 600;
+}
+
+@font-face {
+	font-family: "ArnoPro";
+	src: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerfonts/ArnoPro-LightDisplay.otf');
+	font-style: normal;
+	font-weight: 100;
+}
+
+@page {
+	size: 5.5in 8.5in;
+	margin: 0.3in;
+	padding: 3pt;
+	background-image: url('https://raw.githubusercontent.com/macmillanpublishers/covermaker/master/images/swerve/logo.png');
+	background-size: auto 1.8in;
+	background-position: center bottom;
+	background-repeat: no-repeat;
+	background-color: #fff;
+
+	@top-left-corner {
+	  background-color: #e7d49e;
+	  content: " ";
+	}
+	@top-left {
+	  background-color: #e7d49e;
+	  content: " ";
+	}
+	@left-top {
+	  background-color: #e7d49e;
+	  content: " ";
+	}
+	@top-right-corner {
+	  background-color: #e7d49e;
+	  content: " ";
+	}
+	@right-top {
+	  background-color: #e7d49e;
+	  content: " ";
+	}
+	@bottom-left-corner {
+	  background-color: #e7d49e;
+	  content: " ";
+	}
+	@bottom-left {
+	  background-color: #e7d49e;
+	  content: " ";
+	}
+	@bottom-right-corner {
+	  background-color: #e7d49e;
+	  content: " ";
+	}
+}
+
+body {
+	font-family: "ArnoPro";
+}
+
+div {
+	font-family: "ArnoPro";
+	padding: 0.33in 0.25in 0in 0.25in;
+	font-family: serif;
+	text-align: center;
+	border: 1pt solid black;
+	height: 7.43in;
+}
+
+h1#booktitle {
+	font-family: "ArnoPro";
+	font-weight: normal;
+	text-transform: uppercase;
+	font-size: 0.4in;
+	margin: 0.4in 0;
+	padding: 0;
+}
+
+h2#booksubtitle {
+	font-family: "ArnoPro";
+	font-weight: normal;
+	text-transform: uppercase;
+	font-size: 0.2in;
+	margin: 0.6in 0;
+	padding: 0;
+}
+
+p#bookauthor {
+	font-family: "ArnoPro";
+	font-weight: normal;
+	text-transform: uppercase;
+	font-size: 0.27in;
+	margin: 0 0 2in 0;
+	padding: 0;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	text-align: center;
+}
