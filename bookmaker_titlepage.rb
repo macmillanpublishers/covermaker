@@ -156,8 +156,9 @@ pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script>
 cover_pdf = File.join(coverdir, "titlepage.pdf")
 
 final_cover = File.join(coverdir, "titlepage.jpg")
+arch_cover = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
 
-unless File.file?(final_cover)
+unless File.file?(final_cover) or File.file?(arch_cover)
   FileUtils.cd(coverdir)
   File.open(cover_pdf, "w+b") do |f|
     f.write DocRaptor.create(:document_content => pdf_html,
