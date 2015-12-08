@@ -49,39 +49,6 @@
 	background-position: center bottom;
 	background-repeat: no-repeat;
 	background-color: #fff;
-
-	@top-left-corner {
-	  background-color: #e7d49e;
-	  content: " ";
-	}
-	@top-left {
-	  background-color: #e7d49e;
-	  content: " ";
-	}
-	@left-top {
-	  background-color: #e7d49e;
-	  content: " ";
-	}
-	@top-right-corner {
-	  background-color: #e7d49e;
-	  content: " ";
-	}
-	@right-top {
-	  background-color: #e7d49e;
-	  content: " ";
-	}
-	@bottom-left-corner {
-	  background-color: #e7d49e;
-	  content: " ";
-	}
-	@bottom-left {
-	  background-color: #e7d49e;
-	  content: " ";
-	}
-	@bottom-right-corner {
-	  background-color: #e7d49e;
-	  content: " ";
-	}
 }
 
 body {
@@ -93,7 +60,6 @@ div {
 	padding: 0.33in 0.25in 0in 0.25in;
 	font-family: serif;
 	text-align: center;
-	border: 1pt solid black;
 	height: 7.43in;
 }
 
