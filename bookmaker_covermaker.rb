@@ -13,8 +13,9 @@ pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
 pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
 
 configfile = File.join(Bkmkr::Paths.project_tmp_dir, "config.json")
-file = File.read(configfile)
-data_hash = JSON.parse(file)
+file = File.open(configfile, "r:utf-8")
+content = file.read
+data_hash = JSON.parse(content)
 
 # the cover filename and metadata
 project_dir = data_hash['project']
