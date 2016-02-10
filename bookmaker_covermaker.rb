@@ -1,3 +1,5 @@
+ENV["NLS_LANG"] = "AMERICAN_AMERICA.WE8MSWIN1252"
+
 require 'rubygems'
 require 'doc_raptor'
 require 'fileutils'
