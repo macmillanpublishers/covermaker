@@ -14,7 +14,7 @@ configfile = File.join(Bkmkr::Paths.project_tmp_dir, "config.json")
 file = File.read(configfile)
 data_hash = JSON.parse(file)
 
-# the cover filename
+# the cover filename and metadata
 project_dir = data_hash['project']
 stage_dir = data_hash['stage']
 
@@ -66,51 +66,14 @@ end
 
 pdf_js_file = File.join(Bkmkr::Paths.project_tmp_dir, "cover.js")
 
-# connect to DB for all other metadata
-test_pisbn_chars = Metadata.pisbn.scan(/\d\d\d\d\d\d\d\d\d\d\d\d\d/)
-test_pisbn_length = Metadata.pisbn.split(%r{\s*})
-test_eisbn_chars = Metadata.eisbn.scan(/\d\d\d\d\d\d\d\d\d\d\d\d\d/)
-test_eisbn_length = Metadata.eisbn.split(%r{\s*})
-
-if test_pisbn_length.length == 13 and test_pisbn_chars.length != 0
-  thissql = exactSearchSingleKey(Metadata.pisbn, "EDITION_EAN")
-  myhash = runQuery(thissql)
-elsif test_eisbn_length.length == 13 and test_eisbn_chars.length != 0
-  thissql = exactSearchSingleKey(Metadata.eisbn, "EDITION_EAN")
-  myhash = runQuery(thissql)
-else
-  myhash = {}
-end
-
-unless myhash['book'].nil? or myhash['book'].empty? or !myhash['book']
-  puts "DB Connection SUCCESS: Found a book record"
-else
-  puts "No DB record found; falling back to manuscript fields"
-end
-
 # Finding author name(s)
-if myhash['book'].nil? or myhash['book'].empty? or !myhash['book'] or myhash['book']['WORK_COVERAUTHOR'].nil? or myhash['book']['WORK_COVERAUTHOR'].empty? or !myhash['book']['WORK_COVERAUTHOR']
-  authorname = Metadata.bookauthor
-else
-  authorname = myhash['book']['WORK_COVERAUTHOR']
-  authorname = authorname.encode('utf-8')
-end
+authorname = Metadata.bookauthor
 
 # Finding book title
-if myhash['book'].nil? or myhash['book'].empty? or !myhash['book'] or myhash["book"]["WORK_COVERTITLE"].nil? or myhash["book"]["WORK_COVERTITLE"].empty? or !myhash["book"]["WORK_COVERTITLE"]
-  booktitle = Metadata.booktitle
-else
-  booktitle = myhash["book"]["WORK_COVERTITLE"]
-  booktitle = booktitle.encode('utf-8')
-end
+booktitle = Metadata.booktitle
 
 # Finding book subtitle
-if myhash['book'].nil? or myhash['book'].empty? or !myhash['book'] or myhash["book"]["WORK_SUBTITLE"].nil? or myhash["book"]["WORK_SUBTITLE"].empty? or !myhash["book"]["WORK_SUBTITLE"]
-  booksubtitle = Metadata.booksubtitle
-else
-  booksubtitle = myhash["book"]["WORK_SUBTITLE"]
-  booksubtitle = booksubtitle.encode('utf-8')
-end
+booksubtitle = Metadata.booksubtitle
 
 if booksubtitle == "Unknown"
 	booksubtitle = " "
