@@ -68,9 +68,15 @@ pdf_js_file = File.join(Bkmkr::Paths.project_tmp_dir, "cover.js")
 
 # Finding author name(s)
 authorname = Metadata.bookauthor
+puts authorname
+authorname = authorname.encode('utf-8')
+puts authorname
 
 # Finding book title
 booktitle = Metadata.booktitle
+puts booktitle
+booktitle = booktitle.encode('utf-8')
+puts booktitle
 
 # Finding book subtitle
 booksubtitle = Metadata.booksubtitle
@@ -78,6 +84,9 @@ booksubtitle = Metadata.booksubtitle
 if booksubtitle == "Unknown"
 	booksubtitle = " "
 end
+puts booksubtitle
+booksubtitle = booksubtitle.encode('utf-8')
+puts booksubtitle
 
 FileUtils.cp(cover_js_file, pdf_js_file)
 jscontents = File.read(pdf_js_file).gsub(/BKMKRINSERTBKTITLE/,"#{booktitle}").gsub(/BKMKRINSERTBKSUBTITLE/,"#{booksubtitle}").gsub(/BKMKRINSERTBKAUTHOR/,"#{authorname}")
