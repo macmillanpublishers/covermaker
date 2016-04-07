@@ -108,7 +108,8 @@ elsif File.file?(final_cover)
   shave = (currwidth - targetwidth) / 2
   FileUtils.cp(cover_js_file, pdf_js_file)
   `convert "#{watermarktmp}" -shave '#{shave}x0' -quality 100 "#{watermarktmp}"`
-  `convert "#{watermarktmp}" "#{currcover}" -append -border 1x1 "#{currcover}"`
+  `convert "#{watermarktmp}" "#{currcover}" -append -border 3x3 "#{currcover}"`
+  FileUtils.rm(watermarktmp)
 else
   # sends file to docraptor for conversion
   cover_pdf = File.join(coverdir, "cover.pdf")
