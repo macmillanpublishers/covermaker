@@ -93,10 +93,10 @@ pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script>
 
 final_cover = File.join(coverdir, Metadata.frontcover)
 archived_cover = File.join(archivedir, Metadata.frontcover)
+watermark = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "images", "disclaimer.jpg")
+watermarktmp = File.join(archivedir, "disclaimer.jpg")
 
 if File.file?(final_cover) or File.file?(archived_cover)
-  watermark = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "images", "disclaimer.jpg")
-  watermarktmp = File.join(archivedir, "disclaimer.jpg")
   FileUtils.cp(watermark, watermarktmp)
   if File.file?(final_cover)
     currcover = final_cover
