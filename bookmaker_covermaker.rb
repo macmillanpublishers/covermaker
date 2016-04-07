@@ -107,7 +107,7 @@ if File.file?(final_cover) or File.file?(archived_cover)
   targetwidth = targetwidth.to_f
   currwidth = `identify -format "%w" "#{watermarktmp}"`
   currwidth = currwidth.to_f
-  shave = (targetwidth - currwidth) / 2
+  shave = (currwidth - targetwidth) / 2
   puts shave
   puts watermarktmp
   FileUtils.cp(cover_js_file, pdf_js_file)
