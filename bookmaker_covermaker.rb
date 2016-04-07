@@ -35,6 +35,7 @@ testing_value = "false"
 if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "true" end
 
 coverdir = Bkmkr::Paths.submitted_images
+archivedir = File.join(Bkmkr::Paths.done_dir, Metadata.pisbn, "cover")
 
 # template html file
 if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/#{stage_dir}.html")
@@ -91,8 +92,9 @@ embedjs = File.read(pdf_js_file).to_s
 pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script><style>#{embedcss}</style></head>").to_s
 
 final_cover = File.join(coverdir, Metadata.frontcover)
+archived_cover = File.join(archivedir, Metadata.frontcover)
 
-unless File.file?(final_cover)
+unless File.file?(final_cover) or File.file?(archived_cover)
   # sends file to docraptor for conversion
   cover_pdf = File.join(coverdir, "cover.pdf")
   FileUtils.cd(coverdir)
