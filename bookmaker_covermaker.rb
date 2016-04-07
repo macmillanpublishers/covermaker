@@ -110,7 +110,7 @@ if File.file?(final_cover) or File.file?(archived_cover)
   shave = (targetwidth - currwidth) / 2
   FileUtils.cp(cover_js_file, pdf_js_file)
   `convert -shave #{shave}x0 -quality 100 "#{watermarktmp}"`
-  `convert "#{currcover}" "#{watermarktmp} -append "#{currcover}"`
+  `convert "#{currcover}" "#{watermarktmp}" -append "#{currcover}"`
   FileUtils.rm(watermarktmp)
 else
   # sends file to docraptor for conversion
