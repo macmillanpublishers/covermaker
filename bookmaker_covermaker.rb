@@ -90,29 +90,32 @@ embedjs = File.read(pdf_js_file).to_s
 
 pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script><style>#{embedcss}</style></head>").to_s
 
-# sends file to docraptor for conversion
-cover_pdf = File.join(coverdir, "cover.pdf")
-FileUtils.cd(coverdir)
-File.open(cover_pdf, "w+b") do |f|
-  f.write DocRaptor.create(:document_content => pdf_html,
-                           :name             => "cover.pdf",
-                           :document_type    => "pdf",
-                           :strict			     => "none",
-                           :test             => "#{testing_value}",
-	                         :prince_options	 => {
-	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
-	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
-                               :javascript       => "true"
-							             }
-                       		)
-                           
-end
-
-# convert to jpg
 final_cover = File.join(coverdir, Metadata.frontcover)
-`convert -density 150 "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 "#{final_cover}"`
 
-FileUtils.rm(cover_pdf)
+unless File.file(final_cover)
+  # sends file to docraptor for conversion
+  cover_pdf = File.join(coverdir, "cover.pdf")
+  FileUtils.cd(coverdir)
+  File.open(cover_pdf, "w+b") do |f|
+    f.write DocRaptor.create(:document_content => pdf_html,
+                             :name             => "cover.pdf",
+                             :document_type    => "pdf",
+                             :strict			     => "none",
+                             :test             => "#{testing_value}",
+  	                         :prince_options	 => {
+  	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
+  	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
+                                 :javascript       => "true"
+  							             }
+                         		)                     
+  end
+
+  # convert to jpg
+  `convert -density 150 "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 "#{final_cover}"`
+
+  # delete the PDF
+  FileUtils.rm(cover_pdf)
+end
 
 # TESTING
 
