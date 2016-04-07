@@ -93,8 +93,26 @@ pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script>
 
 final_cover = File.join(coverdir, Metadata.frontcover)
 archived_cover = File.join(archivedir, Metadata.frontcover)
+watermark = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "images", "disclaimer.jpg")
+watermarktmp = File.join(archivedir, "disclaimer.jpg")
+FileUtils.cp(watermark, watermarktmp)
 
 unless File.file?(final_cover) or File.file?(archived_cover)
+  if File.file?(final_cover)
+    currcover = final_cover
+  elsif File.file?(archived_cover)
+    currcover = archived_cover
+  end
+  targetwidth = `identify -format "%w" "#{currcover}"`
+  targetwidth = mywidth.to_f
+  currwidth = `identify -format "%w" "#{watermarktmp}"`
+  currwidth = currwidth.to_f
+  shave = (targetwidth - currwidth) / 2
+  FileUtils.cp(cover_js_file, pdf_js_file)
+  `convert -shave #{shave}x0 -quality 100 "#{watermarktmp}"`
+  `convert "#{currcover}" "#{watermarktmp} -append "#{currcover}"`
+  FileUtils.rm(watermarktmp)
+else
   # sends file to docraptor for conversion
   cover_pdf = File.join(coverdir, "cover.pdf")
   FileUtils.cd(coverdir)
