@@ -104,7 +104,7 @@ if File.file?(final_cover) or File.file?(archived_cover)
     currcover = archived_cover
   end
   targetwidth = `identify -format "%w" "#{currcover}"`
-  targetwidth = mywidth.to_f
+  targetwidth = targetwidth.to_f
   currwidth = `identify -format "%w" "#{watermarktmp}"`
   currwidth = currwidth.to_f
   shave = (targetwidth - currwidth) / 2
