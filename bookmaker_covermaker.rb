@@ -108,10 +108,9 @@ if File.file?(final_cover) or File.file?(archived_cover)
   currwidth = `identify -format "%w" "#{watermarktmp}"`
   currwidth = currwidth.to_f
   targetcolor = `identify -format "%r" "#{currcover}"`
+  targetcolor = targetcolor.split(" ").pop
   shave = (currwidth - targetwidth) / 2
   puts targetcolor
-  puts shave
-  puts watermarktmp
   FileUtils.cp(cover_js_file, pdf_js_file)
   `convert "#{watermarktmp}" -shave '#{shave}x0' -quality 100 -colorspace #{targetcolor} "#{watermarktmp}"`
   `convert "#{watermarktmp}" "#{currcover}" -append "#{currcover}"`
