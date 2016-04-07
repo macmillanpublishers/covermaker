@@ -92,7 +92,7 @@ pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script>
 
 final_cover = File.join(coverdir, Metadata.frontcover)
 
-unless File.file(final_cover)
+unless File.file?(final_cover)
   # sends file to docraptor for conversion
   cover_pdf = File.join(coverdir, "cover.pdf")
   FileUtils.cd(coverdir)
