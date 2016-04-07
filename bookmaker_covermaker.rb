@@ -114,7 +114,7 @@ if File.file?(final_cover) or File.file?(archived_cover)
   FileUtils.cp(cover_js_file, pdf_js_file)
   `convert "#{watermarktmp}" -shave '#{shave}x0' -quality 100 -colorspace #{targetcolor} "#{watermarktmp}"`
   `convert "#{watermarktmp}" "#{currcover}" -append -colorspace #{targetcolor} "#{currcover}"`
-  FileUtils.rm(watermarktmp)
+  #FileUtils.rm(watermarktmp)
 else
   # sends file to docraptor for conversion
   cover_pdf = File.join(coverdir, "cover.pdf")
