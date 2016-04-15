@@ -110,9 +110,7 @@ end
 
 puts markstatus
 
-if File.file?(archived_cover) and markstatus == "marked"
-  puts "Found existing watermarked cover; skipping conversion."
-elsif File.file?(final_cover)
+if File.file?(final_cover)
   FileUtils.cp(watermark, watermarktmp)
   currcover = final_cover
   targetwidth = `identify -format "%w" "#{currcover}"`
@@ -124,6 +122,8 @@ elsif File.file?(final_cover)
   `convert "#{watermarktmp}" -shave #{shave}x0 -quality 100 "#{watermarktmp}"`
   `convert "#{watermarktmp}" "#{currcover}" -append -border 3x3 -comment "marked" "#{currcover}"`
   FileUtils.rm(watermarktmp)
+elsif File.file?(archived_cover) and markstatus != "generated"
+  puts "Found existing cover; skipping conversion."
 else
   # sends file to docraptor for conversion
   cover_pdf = File.join(coverdir, "cover.pdf")
