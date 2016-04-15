@@ -18,6 +18,7 @@ data_hash = Mcmlln::Tools.readjson(configfile)
 # the cover filename and metadata
 project_dir = data_hash['project']
 stage_dir = data_hash['stage']
+resource_dir = data_hash['resourcedir']
 
 # Authentication data is required to use docraptor and 
 # to post images and other assets to the ftp for inclusion 
@@ -106,6 +107,8 @@ markstatus = ""
 if File.file?(archived_cover)
   markstatus = checkMarkStatus(archived_cover)
 end
+
+puts markstatus
 
 if File.file?(archived_cover) and markstatus == "marked"
   puts "Found existing watermarked cover; skipping conversion."
