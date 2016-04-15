@@ -96,7 +96,18 @@ archived_cover = File.join(archivedir, Metadata.frontcover)
 watermark = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "images", "disclaimer.jpg")
 watermarktmp = File.join(archivedir, "disclaimer.jpg")
 
+def checkMarkStatus(image)
+  status = `identify -format "%c" #{image}`
+  return status
+end
+
+markstatus = ""
+
 if File.file?(archived_cover)
+  markstatus = checkMarkStatus(archived_cover)
+end
+
+if File.file?(archived_cover) and markstatus == "marked"
   puts "Found existing watermarked cover; skipping conversion."
 elsif File.file?(final_cover)
   FileUtils.cp(watermark, watermarktmp)
@@ -108,7 +119,7 @@ elsif File.file?(final_cover)
   shave = (currwidth - targetwidth) / 2
   FileUtils.cp(cover_js_file, pdf_js_file)
   `convert "#{watermarktmp}" -shave #{shave}x0 -quality 100 "#{watermarktmp}"`
-  `convert "#{watermarktmp}" "#{currcover}" -append -border 3x3 "#{currcover}"`
+  `convert "#{watermarktmp}" "#{currcover}" -append -border 3x3 -comment "marked" "#{currcover}"`
   FileUtils.rm(watermarktmp)
 else
   # sends file to docraptor for conversion
@@ -129,7 +140,7 @@ else
   end
 
   # convert to jpg
-  `convert -density 150 "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 "#{final_cover}"`
+  `convert -density 150 "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -comment "generated" "#{final_cover}"`
 
   # delete the PDF
   FileUtils.rm(cover_pdf)
