@@ -100,7 +100,13 @@ watermark = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "images", "disclai
 watermarktmp = File.join(archivedir, "disclaimer.jpg")
 
 def checkMarkStatus(image)
-  status = `identify -format "%c" #{image}`
+  if image.include? "GEN"
+    status = "generated"
+  elsif image.include? "MARK"
+    status = "marked"
+  else 
+    status = ""
+  end
   return status
 end
 
@@ -116,21 +122,35 @@ if File.file?(final_cover)
   puts "Found submitted cover; watermarking."
   FileUtils.cp(watermark, watermarktmp)
   currcover = final_cover
+  filename = final_cover.split(Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact)).pop.split(".").shift.split("_").shift
+  filepath = final_cover.split(Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact)).shift
+  markcover = File.join(filepath, "#{filename}MARK_FC.jpg")
+  markcovername = "#{filename}MARK_FC.jpg"
   targetwidth = `identify -format "%w" "#{currcover}"`
   targetwidth = targetwidth.to_f
   currwidth = `identify -format "%w" "#{watermarktmp}"`
   currwidth = currwidth.to_f
   shave = (currwidth - targetwidth) / 2
-  FileUtils.cp(cover_js_file, pdf_js_file)
   `convert "#{watermarktmp}" -shave #{shave}x0 -quality 100 "#{watermarktmp}"`
-  `convert "#{watermarktmp}" "#{currcover}" -append -border 3x3 -comment "marked" "#{currcover}"`
+  `convert "#{watermarktmp}" "#{currcover}" -append -border 3x3 "#{markcover}"`
   FileUtils.rm(watermarktmp)
+  FileUtils.rm(final_cover)
+  puts "rewriting JSON with new cover name"
+  data_hash['frontcover'] = markcovername
+  finaljson = data_hash.to_json
+  File.open(configfile, 'w+:UTF-8') do |f|
+    f.puts finaljson
+  end
 elsif File.file?(archived_cover) and markstatus != "generated"
   puts "Found existing cover; skipping conversion."
 else
   puts "Generating cover."
   # sends file to docraptor for conversion
   cover_pdf = File.join(coverdir, "cover.pdf")
+  filename = final_cover.split(Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact)).pop.split(".").shift.split("_").shift
+  filepath = final_cover.split(Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact)).shift
+  gencover = File.join(filepath, "#{filename}GEN_FC.jpg")
+  gencovername = "#{filename}GEN_FC.jpg"
   FileUtils.cd(coverdir)
   File.open(cover_pdf, "w+b") do |f|
     f.write DocRaptor.create(:document_content => pdf_html,
@@ -147,10 +167,15 @@ else
   end
 
   # convert to jpg
-  `convert -density 150 "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -comment "generated" "#{final_cover}"`
+  `convert -density 150 "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 "#{gencover}"`
 
   # delete the PDF
   FileUtils.rm(cover_pdf)
+  data_hash['frontcover'] = gencovername
+  finaljson = data_hash.to_json
+  File.open(configfile, 'w+:UTF-8') do |f|
+    f.puts finaljson
+  end
 end
 
 puts "FINISHED COVERMAKER"
