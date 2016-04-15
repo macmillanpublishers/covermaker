@@ -38,6 +38,8 @@ if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "
 coverdir = Bkmkr::Paths.submitted_images
 archivedir = File.join(Bkmkr::Paths.done_dir, Metadata.pisbn, "cover")
 
+puts "RUNNING COVERMAKER"
+
 # template html file
 if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/#{stage_dir}.html")
   template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/#{stage_dir}.html"
@@ -111,6 +113,7 @@ end
 puts markstatus
 
 if File.file?(final_cover)
+  puts "Found submitted cover; watermarking."
   FileUtils.cp(watermark, watermarktmp)
   currcover = final_cover
   targetwidth = `identify -format "%w" "#{currcover}"`
@@ -125,6 +128,7 @@ if File.file?(final_cover)
 elsif File.file?(archived_cover) and markstatus != "generated"
   puts "Found existing cover; skipping conversion."
 else
+  puts "Generating cover."
   # sends file to docraptor for conversion
   cover_pdf = File.join(coverdir, "cover.pdf")
   FileUtils.cd(coverdir)
@@ -148,6 +152,8 @@ else
   # delete the PDF
   FileUtils.rm(cover_pdf)
 end
+
+puts "FINISHED COVERMAKER"
 
 # TESTING
 
