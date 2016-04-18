@@ -490,7 +490,7 @@ section[data-type="titlepage"] *[class*="TitlepageImprintLineimp"] {
 
 section[data-type="titlepage"] *[class*="TitlepageLogologo"] {
 	content: " ";
-	background-image: url('https://raw.githubusercontent.com/macmillanpublishers/covermaker/master/images/swerve/logo.png');
+	background-image: url('https://raw.githubusercontent.com/macmillanpublishers/covermaker/master/images/swerve/logo.jpg');
 	background-position: center bottom;
 	background-size: auto 1.8in;
 	background-repeat: no-repeat;
