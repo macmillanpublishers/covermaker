@@ -422,8 +422,8 @@ section.adcard {
 }
 
 section[data-type="titlepage"] > h1 {
-	font-family: "ArnoPro-BoldSubhead", serif;
-	font-weight: normal;
+	font-family: "ArnoPro", serif;
+	font-weight: bold;
 	font-style: normal;
 	font-size: 25pt;
 	line-height: 28pt;
@@ -455,6 +455,7 @@ h1 + *[class*="TitlepageSeriesTitleser"] {
 	line-height: 24pt;
 	font-style: italic;
 	text-align: center;
+	text-indent: 0;
 }
 
 *[class*="TitlepageBookSubtitlestit"]:first-child, 
@@ -489,9 +490,9 @@ section[data-type="titlepage"] *[class*="TitlepageImprintLineimp"] {
 
 section[data-type="titlepage"] *[class*="TitlepageLogologo"] {
 	content: " ";
-	background-image: url("http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerassets/torDOTcom/logo.jpg");
+	background-image: url('https://raw.githubusercontent.com/macmillanpublishers/covermaker/master/images/swerve/logo.png');
 	background-position: center bottom;
-	background-size: 0.58in auto;
+	background-size: auto 1.8in;
 	background-repeat: no-repeat;
 	display: block;
 	float: bottom;
@@ -502,7 +503,7 @@ section[data-type="titlepage"] *[class*="TitlepageLogologo"] {
 }
 
 *[class*="TitlepageCitiescit"], *[class*="TitlepagePublisherNamepub"], *[class*="TitlepageImprintLineimp"] {
-	font-family: "ArnoPro-SmText", serif;
+	font-family: "ArnoPro", serif;
 	font-variant: small-caps;
 	font-variant: prince-opentype(smcp, onum);
 	font-style: normal;
