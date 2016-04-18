@@ -8,7 +8,8 @@ fs.readFile(file, function editContent (err, contents) {
           xmlMode: true
         });
 
-  var output = $('section[data-type="titlepage"]');
+  var content = $('section[data-type="titlepage"]');
+  var output = $('body').empty().append(content)
     fs.writeFile(newfile, output, function(err) {
       if(err) {
           return console.log(err);
