@@ -9,7 +9,10 @@ fs.readFile(file, function editContent (err, contents) {
         });
 
   var content = $('section[data-type="titlepage"]');
-  var output = $('body').empty().append(content)
+  var $body = $( '<body></body>' );
+  $body.append(content)
+  var $head = $( '<head></head>' );
+  var output = $('html').empty().append( $head, $body )
     fs.writeFile(newfile, output, function(err) {
       if(err) {
           return console.log(err);
