@@ -26,7 +26,6 @@ pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "bookmaker_assets", "pdfmaker"
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
 cover_pdf = File.join(coverdir, "titlepage.pdf")
 final_cover = File.join(coverdir, "titlepage.jpg")
-arch_cover = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
 
 # testing to see if ISBN style exists
 spanisbn = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn/)
@@ -71,6 +70,9 @@ elsif pisbn.length == 0 and eisbn.length == 0
   pisbn = Bkmkr::Project.filename
   eisbn = Bkmkr::Project.filename
 end
+
+# must go after the isbn finder
+arch_cover = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
 
 # pdf css to be added to the file that will be sent to docraptor
 # print and epub css files
