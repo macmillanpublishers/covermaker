@@ -75,13 +75,11 @@ end
 arch_cover = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
 
 # pdf css to be added to the file that will be sent to docraptor
-# print and epub css files
-if File.file?("#{pdf_css_dir}/#{project_dir}/#{stage_dir}.css")
-  cover_css_file = "#{pdf_css_dir}/#{project_dir}/#{stage_dir}.css"
-elsif File.file?("#{pdf_css_dir}/#{project_dir}/pdf.css")
-  cover_css_file = "#{pdf_css_dir}/#{project_dir}/pdf.css"
+# pdf css to be added to the file that will be sent to docraptor
+if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/titlepage.css")
+  cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/titlepage.css"
 else
-  cover_css_file = "#{pdf_css_dir}/torDOTcom/pdf.css"
+  cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/generic/titlepage.css"
 end
 
 embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
