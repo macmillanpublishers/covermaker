@@ -151,16 +151,13 @@
 	size: 5in 8in;
 	margin-top: 0.72in;
 	margin-bottom: 0.88in;
+	margin-left: 0.625in;
+	margin-right: 0.625in;
 	padding: 18pt 0 0.36in 0;
-	/*background-image: url("http://www.macmillan.tools.vhost.zerolag.com/bookmaker/testing/tor_fullpage.png"); /* for testing */
-	/*background-image: url("/Users/nellie.mckesson/git/bookmaker_pdfmaker/css/torDOTcom/tor.png");*/
-	background-position: top left;
-	background-size: 100% 100%;
-	background-repeat: no-repeat;
-	marks: crop;
-	prince-mark-offset: 0.125in;
+	marks: none;
+	prince-mark-offset: 0in;
 	prince-mark-length: 0in;
-	bleed: 0.125in;
+	bleed: 0in;
 	@footnotes {
 		font-family: "ArnoPro-SmText", serif;
 		font-size: 9pt;
@@ -171,123 +168,6 @@
 		padding-top: 0.127in;
 		margin-top: 0.38in;
     }
-}
-
-@page :left {
-	margin-left: 0.625in;
-	margin-right: 0.875in;
-}
-
-@page :right {
-	margin-left: 0.875in;
-	margin-right: 0.625in;
-}
-
-@page part {
-	@top-center {
-		font-family: "ArnoPro-Caption", serif;
-		text-align: center;
-		font-style: italic;
-		font-size: 8.5pt;
-		vertical-align: bottom;
-		padding: 0;
-		margin: 0;
-	}
-	@bottom-center {
-		font-family: "ArnoPro-Caption", serif;
-		font-variant: prince-opentype(onum);
-		/*content: counter(page);*/
-		content: flow(runfoot);
-		text-align: center;
-		font-size: 9pt;
-		vertical-align: top;
-	}
-}
-
-@page part:left {
-	@top-center {
-		/*content: string(author);*/
-		content: flow(runheadleft);
-	}
-	
-}
-
-@page part:right {
-	@top-center {
-		/*content: string(title);*/
-		content: flow(runheadright);
-	}
-}
-
-@page part:first {
-	@top-center {
-		content: normal;
-	}
-	@bottom-center {
-		content: normal;
-	}
-}
-
-@page part:blank {
-	margin-top: 2.16in;
-	@top-center {
-		content: normal;
-	}
-	@bottom-center {
-		content: normal;
-	}
-}
-
-@page chapter {
-	@top-center {
-		font-family: "ArnoPro-Caption", serif;
-		text-align: center;
-		font-style: italic;
-		font-size: 8.5pt;
-		vertical-align: bottom;
-		padding: 0;
-		margin: 0;
-	}
-	@bottom-center {
-		font-family: "ArnoPro-Caption", serif;
-		font-variant: prince-opentype(onum);
-		/*content: counter(page);*/
-		content: flow(runfoot);
-		text-align: center;
-		font-size: 9pt;
-		vertical-align: top;
-	}
-}
-
-@page chapter:left {
-	@top-center {
-		/*content: string(author);*/
-		content: flow(runheadleft);
-	}
-	
-}
-
-@page chapter:right {
-	@top-center {
-		/*content: string(title);*/
-		content: flow(runheadright);
-	}
-}
-
-@page chapter:first {
-	@top-center {
-		content: normal;
-	}
-}
-
-@page chapter:blank {
-	margin-top: 2.16in;
-	@top-center {
-		content: normal;
-	}
-	@bottom-center {
-		content: normal;
-	}
 }
 
 @page front {
@@ -340,115 +220,6 @@
 }
 
 @page front:blank {
-	margin-top: 2.16in;
-	@top-center {
-		content: normal;
-	}
-	@bottom-center {
-		content: normal;
-	}
-}
-
-@page copyright {
-	margin-bottom: 0.25in;
-	padding-bottom: 0;
-	@top-center {
-		content: normal;
-		font-family: "ArnoPro-Caption", serif;
-		text-align: center;
-		font-style: italic;
-		font-size: 8.5pt;
-		vertical-align: bottom;
-		padding: 0;
-		margin: 0;
-	}
-	@bottom-center {
-		content: normal;
-		font-family: "ArnoPro-Caption", serif;
-		font-variant: prince-opentype(onum);
-		content: counter(page);
-		text-align: center;
-		font-size: 9pt;
-		vertical-align: top;
-	}
-}
-
-@page copyright:left {
-	@top-center {
-		content: normal;
-	}
-	@bottom-center {
-		content: normal;
-	}
-}
-
-@page copyright:right {
-	@top-center {
-		content: normal;
-	}
-	@bottom-center {
-		content: normal;
-	}
-}
-
-@page copyright:first {
-	@top-center {
-		content: normal;
-	}
-	@bottom-center {
-		content: normal;
-	}
-}
-
-@page copyright:blank {
-	margin-top: 2.16in;
-	@top-center {
-		content: normal;
-	}
-	@bottom-center {
-		content: normal;
-	}
-}
-
-@page fullbleed {
-	margin: 0;
-	padding: 0;
-	@top-center {
-		content: normal;
-	}
-	@bottom-center {
-		content: normal;
-	}
-}
-
-@page fullbleed:left {
-	@top-center {
-		content: normal;
-	}
-	@bottom-center {
-		content: normal;
-	}
-}
-
-@page fullbleed:right {
-	@top-center {
-		content: normal;
-	}
-	@bottom-center {
-		content: normal;
-	}
-}
-
-@page fullbleed:first {
-	@top-center {
-		content: normal;
-	}
-	@bottom-center {
-		content: normal;
-	}
-}
-
-@page fullbleed:blank {
 	margin-top: 2.16in;
 	@top-center {
 		content: normal;
