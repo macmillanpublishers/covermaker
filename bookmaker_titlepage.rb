@@ -20,21 +20,60 @@ docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_ke
 ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
 ftp_pass = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_pass.txt")
 ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
-
-DocRaptor.api_key "#{Bkmkr::Keys.docraptor_key}"
-
-# change to DocRaptor 'test' mode when running from staging server
-testing_value = "false"
-if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "true" end
-
 coverdir = Bkmkr::Paths.submitted_images
-
 template_html = File.join(Bkmkr::Paths.project_tmp_dir, "titlepage.html")
+pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "bookmaker_assets", "pdfmaker", "css")
+gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
+cover_pdf = File.join(coverdir, "titlepage.pdf")
+final_cover = File.join(coverdir, "titlepage.jpg")
+arch_cover = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
+
+# testing to see if ISBN style exists
+spanisbn = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn/)
+multiple_isbns = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand)|(e\s*-*\s*book))\)/)
+
+# determining print isbn
+if spanisbn.length != 0 && multiple_isbns.length != 0
+  pisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand))\)/).to_s.gsub(/-/,"").gsub(/<span class="spanISBNisbn">/, "").gsub(/<\/span>/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  pisbn = pisbn_basestring.match(/\d+\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.?on.?demand))\)/).to_s.gsub(/\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+elsif spanisbn.length != 0 && multiple_isbns.length == 0
+  pisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/spanISBNisbn">\s*.+<\/span>/).to_s.gsub(/-/,"").gsub(/<span class="spanISBNisbn">/, "").gsub(/<\/span>/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  pisbn = pisbn_basestring.match(/\d+/).to_s.gsub(/\["/,"").gsub(/"\]/,"")
+else
+  pisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/ISBN\s*.+\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand))\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  pisbn = pisbn_basestring.match(/\d+\(.*\)/).to_s.gsub(/\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+end
+
+# determining ebook isbn
+if spanisbn.length != 0 && multiple_isbns.length != 0
+  eisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/<span class="spanISBNisbn">\s*.+<\/span>\s*\(e\s*-*\s*book\)/).to_s.gsub(/-/,"").gsub(/<span class="spanISBNisbn">/, "").gsub(/<\/span>/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  eisbn = eisbn_basestring.match(/\d+\(ebook\)/).to_s.gsub(/\(ebook\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+elsif spanisbn.length != 0 && multiple_isbns.length == 0
+  eisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/spanISBNisbn">\s*.+<\/span>/).to_s.gsub(/-/,"").gsub(/<span class="spanISBNisbn">/, "").gsub(/<\/span>/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  eisbn = pisbn_basestring.match(/\d+/).to_s.gsub(/\["/,"").gsub(/"\]/,"")
+else
+  eisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/ISBN\s*.+\s*\(e-*book\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  eisbn = eisbn_basestring.match(/\d+\(ebook\)/).to_s.gsub(/\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+end
+
+# just in case no isbn is found
+if pisbn.length == 0 and eisbn.length != 0
+  pisbn = eisbn
+elsif pisbn.length == 0 and eisbn.length == 0
+  pisbn = Bkmkr::Project.filename
+end
+
+if pisbn.length == 0 and eisbn.length != 0
+  pisbn = eisbn
+elsif pisbn.length != 0 and eisbn.length == 0
+  eisbn = pisbn
+elsif pisbn.length == 0 and eisbn.length == 0
+  pisbn = Bkmkr::Project.filename
+  eisbn = Bkmkr::Project.filename
+end
 
 # pdf css to be added to the file that will be sent to docraptor
 # print and epub css files
-pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "bookmaker_assets", "pdfmaker", "css")
-
 if File.file?("#{pdf_css_dir}/#{project_dir}/#{stage_dir}.css")
   cover_css_file = "#{pdf_css_dir}/#{project_dir}/#{stage_dir}.css"
 elsif File.file?("#{pdf_css_dir}/#{project_dir}/pdf.css")
@@ -46,17 +85,18 @@ end
 embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
 
 # do content conversions
-gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
 Bkmkr::Tools.runnode(gettitlepagejs, "#{Bkmkr::Paths.outputtmp_html} #{template_html}")
 
 pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>").to_s
 
+# Docraptor setup
+DocRaptor.api_key "#{Bkmkr::Keys.docraptor_key}"
+
+# change to DocRaptor 'test' mode when running from staging server
+testing_value = "false"
+if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "true" end
+
 # sends file to docraptor for conversion
-cover_pdf = File.join(coverdir, "titlepage.pdf")
-
-final_cover = File.join(coverdir, "titlepage.jpg")
-arch_cover = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
-
 unless File.file?(final_cover) or File.file?(arch_cover)
   FileUtils.cd(coverdir)
   File.open(cover_pdf, "w+b") do |f|
