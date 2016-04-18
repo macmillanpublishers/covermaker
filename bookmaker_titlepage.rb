@@ -49,8 +49,6 @@ embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
 Bkmkr::Tools.runnode(gettitlepagejs, "#{Bkmkr::Paths.outputtmp_html} #{template_html}")
 
-embedjs = File.read(pdf_js_file).to_s
-
 pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>").to_s
 
 # sends file to docraptor for conversion
