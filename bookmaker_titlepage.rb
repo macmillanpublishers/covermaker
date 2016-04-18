@@ -47,7 +47,7 @@ embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
 
 # do content conversions
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
-Bkmkr::Tools.runnode(gettitlepagejs, Bkmkr::Paths.outputtmp_html, template_html)
+Bkmkr::Tools.runnode(gettitlepagejs, "#{Bkmkr::Paths.outputtmp_html} #{template_html}")
 
 embedjs = File.read(pdf_js_file).to_s
 
