@@ -12,6 +12,7 @@ fs.readFile(file, function editContent (err, contents) {
   var $body = $( '<body></body>' );
   $body.append(content)
   var $head = $( '<head></head>' );
+  $head.append( $('<title>Generated Titlepage</title>') );
   var output = $('html').empty().append( $head, $body )
     fs.writeFile(newfile, output, function(err) {
       if(err) {
