@@ -332,12 +332,10 @@ section[data-type="titlepage"],
 section[data-type="preface"], 
 section[data-type="copyright-page"], 
 section.adcard {
-	page-break-after: always;
 }
 
 section[data-type="halftitlepage"], 
 section[data-type="titlepage"] {
-	page-break-before: right;
 }
 
 section[data-type="preface"].adcard {

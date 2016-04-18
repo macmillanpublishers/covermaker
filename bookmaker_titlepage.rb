@@ -115,7 +115,7 @@ unless File.file?(final_cover) or File.file?(arch_cover)
   # convert to jpg
   `convert -density 150 "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 "#{final_cover}"`
 
-  FileUtils.rm(cover_pdf)
+  #FileUtils.rm(cover_pdf)
 end
 
 # TESTING
