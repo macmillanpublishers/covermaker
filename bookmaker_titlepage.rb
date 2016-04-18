@@ -22,7 +22,7 @@ ftp_pass = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_pass.tx
 ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
 coverdir = Bkmkr::Paths.submitted_images
 template_html = File.join(Bkmkr::Paths.project_tmp_dir, "titlepage.html")
-pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "bookmaker_assets", "pdfmaker", "css")
+pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css")
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
 cover_pdf = File.join(coverdir, "titlepage.pdf")
 final_cover = File.join(coverdir, "titlepage.jpg")
@@ -75,11 +75,10 @@ end
 arch_cover = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
 
 # pdf css to be added to the file that will be sent to docraptor
-# pdf css to be added to the file that will be sent to docraptor
 if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/titlepage.css")
-  cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/titlepage.css"
+  cover_css_file = File.join(pdf_css_dir, project_dir, "titlepage.css")
 else
-  cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/generic/titlepage.css"
+  cover_css_file = File.join(pdf_css_dir, "generic", "titlepage.css")
 end
 
 embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
