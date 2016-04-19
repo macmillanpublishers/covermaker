@@ -468,6 +468,12 @@ h1 ~ *[class*="TitlepageSeriesTitleser"] {
 	margin-top: 6pt;
 }
 
+section.anthology *[class*="TitlepageBookSubtitlestit"] {
+	font-size: 18pt;
+	font-weight: bold;
+	font-style: normal;
+}
+
 *[class*="TitlepageTranslatorNametran"], 
 *[class*="TitlepageContributorNamecon"] {
 	text-align: center;
