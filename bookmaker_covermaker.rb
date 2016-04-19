@@ -116,8 +116,6 @@ if File.file?(archived_cover)
   markstatus = checkMarkStatus(archived_cover)
 end
 
-puts markstatus
-
 if File.file?(final_cover)
   puts "Found submitted cover; watermarking."
   FileUtils.cp(watermark, watermarktmp)
