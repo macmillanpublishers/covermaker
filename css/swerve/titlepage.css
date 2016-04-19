@@ -421,7 +421,7 @@ section.adcard {
 	text-indent: 0;
 }
 
-section[data-type="titlepage"] {
+section[data-type="titlepage"] > * {
 	text-align: center;
 }
 
@@ -448,7 +448,7 @@ section[data-type="titlepage"] > h1:first-child {
 
 h1 + *[class*="TitlepageBookSubtitlestit"], 
 h1 + *[class*="TitlepageSeriesTitleser"] {
-	margin-top: 24pt;
+	margin-top: 32pt;
 	margin-bottom: 0;
 }
 
@@ -460,6 +460,7 @@ h1 + *[class*="TitlepageSeriesTitleser"] {
 	font-style: italic;
 	text-align: center;
 	text-indent: 0;
+	text-transform: uppercase;
 }
 
 *[class*="TitlepageBookSubtitlestit"]:first-child, 
@@ -470,15 +471,32 @@ h1 + *[class*="TitlepageSeriesTitleser"] {
 *[class*="TitlepageTranslatorNametran"], 
 *[class*="TitlepageContributorNamecon"] {
 	text-align: center;
+	text-transform: uppercase;
+}
+
+*[class*="TitlepageAuthorNameau"] {
+	font-size: 16pt;
+	text-indent: 0;
+	text-align: center;
+	text-transform: uppercase;
+	string-set: author content();
 }
 
 section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] {
-	font-size: 16pt;
-	margin-top: 24pt;
+	float: bottom;
+}
+
+section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"]:last-of-type {
+	margin-bottom: 64pt;
+}
+
+section.anthology *[class*="TitlepageAuthorNameau"] {
+	float: none;
 	margin-bottom: 32pt;
-	text-indent: 0;
-	text-align: center;
-	string-set: author content();
+}
+
+section.anthology *[class*="TitlepageAuthorNameau"]:last-of-type {
+	margin-bottom: 32pt;
 }
 
 section[data-type="titlepage"] *[class*="TitlepageImprintLineimp"] {
