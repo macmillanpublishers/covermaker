@@ -147,10 +147,15 @@ else
   puts "Generating cover."
   # sends file to docraptor for conversion
   cover_pdf = File.join(coverdir, "cover.pdf")
-  filename = final_cover.split(Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact)).pop.split(".").shift.split("_").shift
-  filepath = final_cover.split(Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact))[0...-1].join(File::SEPARATOR)
-  gencover = File.join(filepath, "#{filename}GEN_FC.jpg")
-  gencovername = "#{filename}GEN_FC.jpg"
+  if markstatus == "generated"
+    filename = final_cover.split(Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact)).pop.split(".").shift.split("_").shift
+    filepath = final_cover.split(Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact))[0...-1].join(File::SEPARATOR)
+    gencover = File.join(filepath, "#{filename}GEN_FC.jpg")
+    gencovername = "#{filename}GEN_FC.jpg"
+  else 
+    gencover = final_cover
+    gencovername = final_cover.split(Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact)).pop
+  end
   FileUtils.cd(coverdir)
   File.open(cover_pdf, "w+b") do |f|
     f.write DocRaptor.create(:document_content => pdf_html,
