@@ -112,7 +112,7 @@ unless File.file?(final_cover) or File.file?(arch_cover)
                          		)                         
   end
   # convert to jpg
-  `convert -density 150 "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -colorspace sRGB "#{final_cover}"`
+  `convert "#{cover_pdf}" -density 150 -quality 100 -sharpen 0x1.0 -resize 600 -colorspace sRGB -background white -flatten "#{final_cover}"`
 
   #FileUtils.rm(cover_pdf)
 end
