@@ -524,6 +524,7 @@ section[data-type="titlepage"] *[class*="TitlepageLogologo"] {
 	width: 100%;
 	height: 0.5in;
 	text-align: center;
+	margin-top: 48pt;
 	margin-bottom: 0.2in;
 }
 
