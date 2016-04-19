@@ -421,6 +421,10 @@ section.adcard {
 	text-indent: 0;
 }
 
+section[data-type="titlepage"] {
+	text-align: center;
+}
+
 section[data-type="titlepage"] > h1 {
 	font-family: "ArnoPro", serif;
 	font-weight: bold;
@@ -470,11 +474,6 @@ h1 + *[class*="TitlepageSeriesTitleser"] {
 
 section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] {
 	font-size: 16pt;
-	padding-top: 40pt;
-	background-image: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerassets/titlepage-rule.jpg');
-	background-size: 60pt auto;
-	background-position: top;
-	background-repeat: no-repeat;
 	margin-top: 24pt;
 	margin-bottom: 32pt;
 	text-indent: 0;
@@ -492,7 +491,7 @@ section[data-type="titlepage"] *[class*="TitlepageLogologo"] {
 	content: " ";
 	background-image: url('https://raw.githubusercontent.com/macmillanpublishers/covermaker/master/images/swerve/logo.jpg');
 	background-position: center bottom;
-	background-size: auto 1.8in;
+	background-size: auto 0.3in;
 	background-repeat: no-repeat;
 	display: block;
 	float: bottom;
