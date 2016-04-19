@@ -446,8 +446,8 @@ section[data-type="titlepage"] > h1:first-child {
 	margin-top: 26pt;
 }
 
-h1 + *[class*="TitlepageBookSubtitlestit"], 
-h1 + *[class*="TitlepageSeriesTitleser"] {
+h1 ~ *[class*="TitlepageBookSubtitlestit"], 
+h1 ~ *[class*="TitlepageSeriesTitleser"] {
 	margin-top: 32pt;
 	margin-bottom: 0;
 }
@@ -484,6 +484,7 @@ h1 + *[class*="TitlepageSeriesTitleser"] {
 
 section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] {
 	float: bottom;
+	margin-top: 32pt;
 }
 
 section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"]:last-of-type {
@@ -492,6 +493,7 @@ section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"]:last-of-type {
 
 section.anthology *[class*="TitlepageAuthorNameau"] {
 	float: none;
+	margin-top: 16pt;
 	margin-bottom: 32pt;
 }
 
