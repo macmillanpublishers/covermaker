@@ -135,7 +135,7 @@ if File.file?(final_cover)
   FileUtils.rm(final_cover)
   puts "rewriting JSON with new cover name"
   data_hash['frontcover'] = markcovername
-  finaljson = data_hash.to_json
+  finaljson = JSON.generate(datahash)
   File.open(configfile, 'w+:UTF-8') do |f|
     f.puts finaljson
   end
@@ -175,7 +175,7 @@ else
   # delete the PDF
   FileUtils.rm(cover_pdf)
   data_hash['frontcover'] = gencovername
-  finaljson = data_hash.to_json
+  finaljson = JSON.generate(datahash)
   File.open(configfile, 'w+:UTF-8') do |f|
     f.puts finaljson
   end
