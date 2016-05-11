@@ -112,10 +112,6 @@ elsif File.file?(coverlog) and File.file?(final_cover)
   gen = false
   Mcmlln::Tools.deleteFile(coverlog)
   Mcmlln::Tools.deleteFile(archived_cover)
-elsif File.file?(coverlog) and File.file?(archived_cover)
-  gen = true
-  Mcmlln::Tools.deleteFile(coverlog)
-  Mcmlln::Tools.deleteFile(archived_cover)
 elsif !File.file?(coverlog) and !File.file?(final_cover) and !File.file?(archived_cover)
   gen = true
 end
