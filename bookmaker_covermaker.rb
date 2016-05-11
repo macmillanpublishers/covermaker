@@ -116,8 +116,6 @@ elsif !File.file?(coverlog) and !File.file?(final_cover) and !File.file?(archive
   gen = true
 end
 
-puts gen
-
 if File.file?(final_cover)
   puts "Found submitted cover; watermarking."
   FileUtils.cp(watermark, watermarktmp)

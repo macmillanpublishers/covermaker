@@ -91,8 +91,6 @@ elsif !File.file?(titlepagelog) and !File.file?(final_cover) and !File.file?(arc
   gen = true
 end
 
-puts gen
-
 # pdf css to be added to the file that will be sent to docraptor
 if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/titlepage.css")
   cover_css_file = File.join(pdf_css_dir, project_dir, "titlepage.css")
