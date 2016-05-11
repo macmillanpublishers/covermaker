@@ -112,7 +112,11 @@ elsif File.file?(coverlog) and File.file?(final_cover)
   gen = false
   Mcmlln::Tools.deleteFile(coverlog)
   Mcmlln::Tools.deleteFile(arch_cover)
+elsif !File.file?(coverlog) and !File.file?(final_cover) and !File.file?(archived_cover)
+  gen = true
 end
+
+puts gen
 
 if File.file?(final_cover)
   puts "Found submitted cover; watermarking."
