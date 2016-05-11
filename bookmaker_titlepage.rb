@@ -27,6 +27,8 @@ gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "g
 cover_pdf = File.join(coverdir, "titlepage.pdf")
 final_cover = File.join(coverdir, "titlepage.jpg")
 
+puts "RUNNING TITLEPAGEMAKER"
+
 # testing to see if ISBN style exists
 spanisbn = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn/)
 multiple_isbns = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand)|(e\s*-*\s*book))\)/)
@@ -72,7 +74,22 @@ elsif pisbn.length == 0 and eisbn.length == 0
 end
 
 # must go after the isbn finder
+logdir = File.join(Bkmkr::Paths.done_dir, pisbn, "logs")
+titlepagelog = File.join(logdir, "titlepage.txt")
 arch_cover = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
+gen = false
+
+if File.file?(titlepagelog) and !File.file?(final_cover)
+  gen = true
+  Mcmlln::Tools.deleteFile(titlepagelog)
+  Mcmlln::Tools.deleteFile(arch_cover)
+elsif File.file?(titlepagelog) and File.file?(final_cover)
+  gen = false
+  Mcmlln::Tools.deleteFile(titlepagelog)
+  Mcmlln::Tools.deleteFile(arch_cover)
+elsif !File.file?(titlepagelog) and !File.file?(final_cover) and !File.file?(arch_cover)
+  gen = true
+end
 
 # pdf css to be added to the file that will be sent to docraptor
 if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/titlepage.css")
@@ -96,7 +113,8 @@ testing_value = "false"
 if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "true" end
 
 # sends file to docraptor for conversion
-unless File.file?(final_cover) or File.file?(arch_cover)
+unless gen == false
+  puts "Generating titlepage."
   FileUtils.cd(coverdir)
   File.open(cover_pdf, "w+b") do |f|
     f.write DocRaptor.create(:document_content => pdf_html,
@@ -115,7 +133,18 @@ unless File.file?(final_cover) or File.file?(arch_cover)
   `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
 
   FileUtils.rm(cover_pdf)
+
+  unless Dir.exist?(logdir)
+    Mcmlln::Tools.makeDir(logdir)
+  end
+
+  File.open(titlepagelog, 'w+') do |f|
+    f.puts Time.now
+    f.puts "titlepage generated from document section.titlepage"
+  end
 end
+
+puts "FINISHED TITLEPAGEMAKER"
 
 # TESTING
 if File.file?(final_cover)
