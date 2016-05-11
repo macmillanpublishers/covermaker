@@ -79,15 +79,15 @@ titlepagelog = File.join(logdir, "titlepage.txt")
 arch_cover = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
 gen = false
 
-if File.file?(coverlog) and !File.file?(final_cover)
+if File.file?(titlepagelog) and !File.file?(final_cover)
   gen = true
-  Mcmlln::Tools.deleteFile(coverlog)
+  Mcmlln::Tools.deleteFile(titlepagelog)
   Mcmlln::Tools.deleteFile(arch_cover)
-elsif File.file?(coverlog) and File.file?(final_cover)
+elsif File.file?(titlepagelog) and File.file?(final_cover)
   gen = false
-  Mcmlln::Tools.deleteFile(coverlog)
+  Mcmlln::Tools.deleteFile(titlepagelog)
   Mcmlln::Tools.deleteFile(arch_cover)
-elsif !File.file?(coverlog) and !File.file?(final_cover) and !File.file?(arch_cover)
+elsif !File.file?(titlepagelog) and !File.file?(final_cover) and !File.file?(arch_cover)
   gen = true
 end
 
