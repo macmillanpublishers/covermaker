@@ -99,7 +99,7 @@ archived_cover = File.join(archivedir, Metadata.frontcover)
 watermark = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "images", "disclaimer.jpg")
 watermarktmp = File.join(archivedir, "disclaimer.jpg")
 
-logdir = File.join(Bkmkr::Paths.done_dir, pisbn, "logs")
+logdir = File.join(Bkmkr::Paths.done_dir, Metadata.pisbn, "logs")
 coverlog = File.join(logdir, "cover.txt")
 gen = false
 
