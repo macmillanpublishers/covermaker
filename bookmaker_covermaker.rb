@@ -92,7 +92,7 @@ end
 
 embedjs = File.read(pdf_js_file).to_s
 
-pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script><style>#{embedcss}</style></head>").to_s
+pdf_html = File.read(template_html).gsub(/<\/head>/,"<script>#{embedjs}</script><style>#{embedcss}</style></head>").gsub(/RESOURCEDIR/,"#{resource_dir}").to_s
 
 final_cover = File.join(coverdir, Metadata.frontcover)
 archived_cover = File.join(archivedir, Metadata.frontcover)
