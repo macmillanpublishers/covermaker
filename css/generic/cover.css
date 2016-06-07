@@ -45,10 +45,10 @@
 	margin: 0.3in;
 	border: 1pt solid black;
 	padding: 3pt;
-	background-size: auto 1.8in;
+	/*background-size: auto 1.8in;
 	background-position: center bottom;
 	background-repeat: no-repeat;
-	background-color: #fff;
+	background-color: #fff;*/
 
 	@top-left-corner {
 	  background-color: #e7d49e;
@@ -147,14 +147,14 @@ p#bookauthor {
 }
 
 p#logo {
-	height: 1.8in;
-	width: 1.8in;
+	height: 1in;
+	width: 100%;
 	float: bottom;
 	text-align: center;
 	text-indent: 0;
 }
 
 p#logo img {
-	max-height: 1.8in;
-	max-width: 1.8in;
+	max-height: 100%;
+	max-width: 1in;
 }
