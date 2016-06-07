@@ -46,11 +46,6 @@
 	border: 1pt solid black;
 	padding: 3pt;
 	/*background-image: url('https://raw.githubusercontent.com/macmillanpublishers/bookmaker_deploy/master/assets/egalley_SMP/logo.png');*/
-	background-image: url('https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/epubmaker/images/SMP/logo.jpg');
-	/*background-size: auto 1.8in;*/
-	background-position: center bottom;
-	background-repeat: no-repeat;
-	background-color: #fff;
 
 	@top-left-corner {
 	  background-color: #e7d49e;
@@ -92,11 +87,16 @@ body {
 
 div {
 	font-family: "ArnoPro";
-	padding: 0.33in 0.25in 0in 0.25in;
+	padding: 0.33in 0.25in 0.5in 0.25in;
 	font-family: serif;
 	text-align: center;
 	border: 1pt solid black;
 	height: 7.43in;
+	background-image: url('https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/epubmaker/images/SMP/logo.jpg');
+	/*background-size: auto 1.8in;*/
+	background-position: center bottom;
+	background-repeat: no-repeat;
+	background-color: #fff;
 }
 
 h1.chaptitle {
