@@ -152,6 +152,7 @@ p#logo {
 	float: bottom;
 	text-align: center;
 	text-indent: 0;
+	border: 1pt solid #000;
 }
 
 p#logo img {
