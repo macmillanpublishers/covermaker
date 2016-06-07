@@ -9,8 +9,13 @@ require_relative '../utilities/oraclequery.rb'
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
 pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
 
-project_dir = Bkmkr::Project.input_file.split(Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact))[0...-2].pop.to_s.split("_").shift
-stage_dir = Bkmkr::Project.input_file.split(Regexp.union(*[File::SEPARATOR, File::ALT_SEPARATOR].compact))[0...-2].pop.to_s.split("_").pop
+configfile = File.join(Bkmkr::Paths.project_tmp_dir, "config.json")
+data_hash = Mcmlln::Tools.readjson(configfile)
+
+# the cover filename and metadata
+project_dir = data_hash['project']
+stage_dir = data_hash['stage']
+resource_dir = data_hash['resourcedir']
 
 # Authentication data is required to use docraptor and 
 # to post images and other assets to the ftp for inclusion 
