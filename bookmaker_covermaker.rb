@@ -161,6 +161,12 @@ elsif gen == true
     f.puts Time.now
     f.puts "cover generated from document metadata"
   end
+
+  coverhtml = File.join(coverdir, "cover.html")
+
+  File.open(coverhtml, 'w+') do |f|
+    f.puts pdf_html
+  end
 end
 
 puts "FINISHED COVERMAKER"
