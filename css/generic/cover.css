@@ -135,10 +135,9 @@ p#bookauthor {
   text-transform: uppercase;
   font-size: 0.27in;
   margin: 0;
-  padding: 0;
+  padding: 0 0.3in 0 0.3in;
   width: 100%;
   text-align: center;
-  float: column-bottom;
   position: absolute;
   left: 0;
   top: 5.5in;

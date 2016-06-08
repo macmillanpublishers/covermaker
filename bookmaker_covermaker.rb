@@ -148,7 +148,7 @@ elsif gen == true
   end
 
   # convert to jpg
-  `convert -density 150 "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 "#{final_cover}"`
+  `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
 
   # delete the PDF
   FileUtils.rm(cover_pdf)
