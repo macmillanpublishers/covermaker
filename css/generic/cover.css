@@ -92,7 +92,6 @@ div.container {
   font-family: serif;
   text-align: center;
   height: 6.5in;
-  border: 1pt solid red;
 }
 
 h1.chaptitle {
@@ -150,7 +149,6 @@ div.logo {
   width: 100%;
   text-align: center;
   text-indent: 0;
-  border: 1pt solid #000;
   position: fixed;
   left: 0;
   top: 6.9in;
