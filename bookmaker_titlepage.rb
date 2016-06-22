@@ -78,6 +78,7 @@ final_cover = File.join(coverdir, "epubtitlepage.jpg")
 
 puts "RUNNING TITLEPAGEMAKER"
 
+# --------------- ISBN FINDER COPIED FROM BOOKMAKER_ADDONS/METADATA_PREPROCESSING
 # testing to see if ISBN style exists
 spanisbn = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn/)
 multiple_isbns = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand)|(e\s*-*\s*book))\)/)
@@ -163,6 +164,8 @@ elsif pisbn.length == 0 and eisbn.length == 0
   eisbn = Bkmkr::Project.filename
 end
 
+# --------------- FINISH ISBN FINDER
+
 # must go after the isbn finder
 final_dir = File.join(Bkmkr::Paths.done_dir, pisbn)
 final_dir_images = File.join(Bkmkr::Paths.done_dir, pisbn, "images")
@@ -226,15 +229,18 @@ unless gen == false
 
   FileUtils.rm(cover_pdf)
 
+  # create the final archive dirs if they don't exist yet
   unless Dir.exist?(final_dir)
     Mcmlln::Tools.makeDir(final_dir)
     Mcmlln::Tools.makeDir(final_dir_images)
   end
 
+  # create the logging dir if it doesn't exist yet
   unless Dir.exist?(logdir)
     Mcmlln::Tools.makeDir(logdir)
   end
 
+  # write the titlepage gen log
   File.open(titlepagelog, 'w+') do |f|
     f.puts Time.now
     f.puts "titlepage generated from document section.titlepage"
