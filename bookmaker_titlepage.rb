@@ -5,6 +5,50 @@ require 'fileutils'
 require_relative '../bookmaker/core/header.rb'
 require_relative '../utilities/oraclequery.rb'
 
+# ---------------------- METHODS
+
+# find any tagged isbn in an html file
+def findAnyISBN(file)
+  isbn_basestring = File.read(file).match(/spanISBNisbn">\s*978(\D?\d?){10}<\/span>/)
+  unless isbn_basestring.length == 0
+    isbn_basestring = isbn_basestring.to_s.gsub(/\D/,"")
+    isbn = isbn_basestring.match(/978(\d{10})/).to_s
+  else
+    isbn = ""
+  end
+  return isbn
+end
+
+# find a tagged isbn in an html file that matches a provided book type
+def findSpecificISBN(file, string, type)
+  allisbns = File.read(file).scan(/(<span class="spanISBNisbn">\s*97[89]((\D?\d){10})<\/span>\s*\(?.*?\)?\s*<\/p>)/)
+  pisbn = []
+  allisbns.each do |k|
+    testisbn = ""
+    testisbn = k.to_s.match(/#{string}/)
+    case type
+    when "include"
+      unless testisbn.nil?
+        pisbn.push(k)
+      end
+    when "exclude"
+      if testisbn.nil?
+        pisbn.push(k)
+      end
+    end
+  end
+  isbn_basestring = pisbn.shift
+  unless isbn_basestring.length == 0
+    isbn_basestring = isbn_basestring.to_s.gsub(/\D/,"")
+    isbn = isbn_basestring.match(/978(\d{10})/).to_s
+  else
+    isbn = ""
+  end
+  return isbn
+end
+
+# ---------------------- PROCESSES
+
 # Local path var(s)
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
 pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
@@ -30,39 +74,81 @@ template_html = File.join(Bkmkr::Paths.project_tmp_dir, "titlepage.html")
 pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css")
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
 cover_pdf = File.join(coverdir, "titlepage.pdf")
-final_cover = File.join(coverdir, "titlepage.jpg")
+final_cover = File.join(coverdir, "epubtitlepage.jpg")
 
 puts "RUNNING TITLEPAGEMAKER"
 
+# --------------- ISBN FINDER COPIED FROM BOOKMAKER_ADDONS/METADATA_PREPROCESSING
 # testing to see if ISBN style exists
 spanisbn = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn/)
 multiple_isbns = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand)|(e\s*-*\s*book))\)/)
 
 # determining print isbn
-if spanisbn.length != 0 && multiple_isbns.length != 0
-  pisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand))\)/).to_s.gsub(/-/,"").gsub(/<span class="spanISBNisbn">/, "").gsub(/<\/span>/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
-  pisbn = pisbn_basestring.match(/\d+\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.?on.?demand))\)/).to_s.gsub(/\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
-elsif spanisbn.length != 0 && multiple_isbns.length == 0
-  pisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/spanISBNisbn">\s*.+<\/span>/).to_s.gsub(/-/,"").gsub(/<span class="spanISBNisbn">/, "").gsub(/<\/span>/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
-  pisbn = pisbn_basestring.match(/\d+/).to_s.gsub(/\["/,"").gsub(/"\]/,"")
-else
-  pisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/ISBN\s*.+\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand))\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
-  pisbn = pisbn_basestring.match(/\d+\(.*\)/).to_s.gsub(/\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+# search for any isbn
+looseisbn = findAnyISBN(Bkmkr::Paths.outputtmp_html)
+pisbn = ""
+eisbn = ""
+isbnhash = {}
+
+# query biblio, get WORK_ID
+if looseisbn.length == 13
+  puts "Searching data warehouse for ISBN: #{looseisbn}"
+  thissql = exactSearchSingleKey(looseisbn, "EDITION_EAN")
+  isbnhash = runQuery(thissql)
 end
 
-# determining ebook isbn
-if spanisbn.length != 0 && multiple_isbns.length != 0
-  eisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/<span class="spanISBNisbn">\s*.+<\/span>\s*\(e\s*-*\s*book\)/).to_s.gsub(/-/,"").gsub(/<span class="spanISBNisbn">/, "").gsub(/<\/span>/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
-  eisbn = eisbn_basestring.match(/\d+\(ebook\)/).to_s.gsub(/\(ebook\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
-elsif spanisbn.length != 0 && multiple_isbns.length == 0
-  eisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/spanISBNisbn">\s*.+<\/span>/).to_s.gsub(/-/,"").gsub(/<span class="spanISBNisbn">/, "").gsub(/<\/span>/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
-  eisbn = pisbn_basestring.match(/\d+/).to_s.gsub(/\["/,"").gsub(/"\]/,"")
+# we'll use this later to find the cover file
+allworks = []
+
+# if query returns results, query again to find all book records under the same WORK_ID
+unless isbnhash.nil? or isbnhash.empty? or !isbnhash or isbnhash['book'].nil? or isbnhash['book'].empty? or !isbnhash['book']
+  puts "DB Connection SUCCESS: Found an isbn record"
+  workid = isbnhash['book']['WORK_ID']
+  thissql = exactSearchSingleKey(workid, "WORK_ID")
+  editionshash = runQuery(thissql)
+  unless editionshash.nil? or editionshash.empty? or !editionshash
+    editionshash.each do |k, v|
+      allworks.push(v['EDITION_EAN'])
+      # find a print product if it exists
+      if v['PRODUCTTYPE_DESC'] and v['PRODUCTTYPE_DESC'] == "Book"
+        pisbn = v['EDITION_EAN']
+        puts "Found a print product: #{pisbn}"
+      # find an ebook product if it exists
+      elsif v['PRODUCTTYPE_DESC'] and v['PRODUCTTYPE_DESC'] == "EBook"
+        eisbn = v['EDITION_EAN']
+        puts "Found an ebook product: #{eisbn}"
+      end
+    end
+  end
 else
-  eisbn_basestring = File.read(Bkmkr::Paths.outputtmp_html).match(/ISBN\s*.+\s*\(e-*book\)/).to_s.gsub(/-/,"").gsub(/\s+/,"").gsub(/\["/,"").gsub(/"\]/,"")
-  eisbn = eisbn_basestring.match(/\d+\(ebook\)/).to_s.gsub(/\(.*\)/,"").gsub(/\["/,"").gsub(/"\]/,"")
+  puts "No DB record found; retrieving ISBNs from manuscript fields"
+  # if not found, revert to mining manuscript fields for isbns
+  spanisbn = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn/)
+
+  # determining print isbn
+  if spanisbn.length != 0
+    psearchstring = "[eE]\\s*-*\\s*[bB]ook"
+    pisbn = findSpecificISBN(Bkmkr::Paths.outputtmp_html, psearchstring, "exclude")
+    if pisbn.length == 0
+      pisbn = looseisbn
+    end
+    unless pisbn.length == 0
+      puts "Found a print isbn: #{pisbn}"
+      allworks.push(pisbn)
+    end
+    esearchstring = "[eE]\\s*-*\\s*[bB]ook"
+    eisbn = findSpecificISBN(Bkmkr::Paths.outputtmp_html, esearchstring, "include")
+    if eisbn.length == 0
+      eisbn = looseisbn
+    end
+    unless eisbn.length == 0
+      puts "Found an ebook isbn: #{eisbn}"
+      allworks.push(eisbn)
+    end
+  end
 end
 
-# just in case no isbn is found
+# just in case no isbn is found, rename based on filename
 if pisbn.length == 0 and eisbn.length != 0
   pisbn = eisbn
 elsif pisbn.length == 0 and eisbn.length == 0
@@ -78,7 +164,11 @@ elsif pisbn.length == 0 and eisbn.length == 0
   eisbn = Bkmkr::Project.filename
 end
 
+# --------------- FINISH ISBN FINDER
+
 # must go after the isbn finder
+final_dir = File.join(Bkmkr::Paths.done_dir, pisbn)
+final_dir_images = File.join(Bkmkr::Paths.done_dir, pisbn, "images")
 logdir = File.join(Bkmkr::Paths.done_dir, pisbn, "logs")
 titlepagelog = File.join(logdir, "titlepage.txt")
 arch_cover = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
@@ -139,10 +229,18 @@ unless gen == false
 
   FileUtils.rm(cover_pdf)
 
+  # create the final archive dirs if they don't exist yet
+  unless Dir.exist?(final_dir)
+    Mcmlln::Tools.makeDir(final_dir)
+    Mcmlln::Tools.makeDir(final_dir_images)
+  end
+
+  # create the logging dir if it doesn't exist yet
   unless Dir.exist?(logdir)
     Mcmlln::Tools.makeDir(logdir)
   end
 
+  # write the titlepage gen log
   File.open(titlepagelog, 'w+') do |f|
     f.puts Time.now
     f.puts "titlepage generated from document section.titlepage"
