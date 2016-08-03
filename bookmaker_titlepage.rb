@@ -74,7 +74,16 @@ template_html = File.join(Bkmkr::Paths.project_tmp_dir, "titlepage.html")
 pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css")
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
 cover_pdf = File.join(coverdir, "titlepage.pdf")
-final_cover = File.join(coverdir, "epubtitlepage.jpg")
+epubtitlepage = File.join(coverdir, "epubtitlepage.jpg")
+podtitlepage = File.join(coverdir, "titlepage.jpg")
+
+if File.file?(epubtitlepage)
+  final_cover = epubtitlepage
+elsif File.file?(podtitlepage)
+  final_cover = podtitlepage
+else
+  final_cover = epubtitlepage
+end
 
 puts "RUNNING TITLEPAGEMAKER"
 
@@ -174,6 +183,7 @@ titlepagelog = File.join(logdir, "titlepage.txt")
 arch_cover = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
 gen = false
 
+# check to see if a titlepage image already exists
 if File.file?(titlepagelog) and !File.file?(final_cover)
   gen = true
   Mcmlln::Tools.deleteFile(titlepagelog)
