@@ -83,7 +83,7 @@ ptparr = Dir[allimg].select { |f| f.include?('titlepage.')}
 if etparr.any?
   epubtitlepage = etparr.find { |e| /[\/|\\]epubtitlepage\./ =~ e }
 else
-  epubtitlepage = ""
+  epubtitlepage = File.join(coverdir, "epubtitlepage.jpg")
 end
 
 puts epubtitlepage
@@ -91,7 +91,7 @@ puts epubtitlepage
 if ptparr.any?
   podtitlepage = ptparr.find { |e| /[\/|\\]titlepage\./ =~ e }
 else
-  podtitlepage = ""
+  podtitlepage = File.join(coverdir, "titlepage.jpg")
 end
 
 puts podtitlepage
