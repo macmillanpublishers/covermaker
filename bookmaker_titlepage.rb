@@ -81,7 +81,7 @@ etparr = Dir[allimg].select { |f| f.include?('epubtitlepage.')}
 ptparr = Dir[allimg].select { |f| f.include?('titlepage.')}
 
 if etparr.any?
-  epubtitlepage = etparr1.find { |e| /[\/|\\]epubtitlepage\./ =~ e }
+  epubtitlepage = etparr.find { |e| /[\/|\\]epubtitlepage\./ =~ e }
 else
   epubtitlepage = ""
 end
@@ -89,7 +89,7 @@ end
 puts epubtitlepage
 
 if ptparr.any?
-  podtitlepage = ptparr1.find { |e| /[\/|\\]titlepage\./ =~ e }
+  podtitlepage = ptparr.find { |e| /[\/|\\]titlepage\./ =~ e }
 else
   podtitlepage = ""
 end
