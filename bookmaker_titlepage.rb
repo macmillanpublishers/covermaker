@@ -74,8 +74,27 @@ template_html = File.join(Bkmkr::Paths.project_tmp_dir, "titlepage.html")
 pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css")
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
 cover_pdf = File.join(coverdir, "titlepage.pdf")
-epubtitlepage = File.join(coverdir, "epubtitlepage.jpg")
-podtitlepage = File.join(coverdir, "titlepage.jpg")
+
+# find titlepage images
+allimg = File.join(coverdir, "*")
+etparr = Dir[allimg].select { |f| f.include?('epubtitlepage.')}
+ptparr = Dir[allimg].select { |f| f.include?('titlepage.')}
+
+if etparr.any?
+  epubtitlepage = etparr1.find { |e| /[\/|\\]epubtitlepage\./ =~ e }
+else
+  epubtitlepage = ""
+end
+
+puts epubtitlepage
+
+if ptparr.any?
+  podtitlepage = ptparr1.find { |e| /[\/|\\]titlepage\./ =~ e }
+else
+  podtitlepage = ""
+end
+
+puts podtitlepage
 
 if File.file?(epubtitlepage)
   final_cover = epubtitlepage
@@ -180,8 +199,17 @@ final_dir = File.join(Bkmkr::Paths.done_dir, pisbn)
 final_dir_images = File.join(Bkmkr::Paths.done_dir, pisbn, "images")
 logdir = File.join(Bkmkr::Paths.done_dir, pisbn, "logs")
 titlepagelog = File.join(logdir, "titlepage.txt")
-arch_cover = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
+arch_podtp = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
+arch_epubtp = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "epubtitlepage.jpg")
 gen = false
+
+if File.file?(arch_epubtp)
+  arch_cover = arch_epubtp
+elsif File.file?(arch_podtp)
+  arch_cover = arch_podtp
+else
+  arch_cover = arch_podtp
+end
 
 # check to see if a titlepage image already exists
 if File.file?(titlepagelog) and !File.file?(final_cover)
