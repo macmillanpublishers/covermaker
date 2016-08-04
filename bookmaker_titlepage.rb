@@ -80,6 +80,8 @@ allimg = File.join(coverdir, "*")
 etparr = Dir[allimg].select { |f| f.include?('epubtitlepage.')}
 ptparr = Dir[allimg].select { |f| f.include?('titlepage.')}
 
+puts ptparr
+
 if etparr.any?
   epubtitlepage = etparr.find { |e| /[\/|\\]epubtitlepage\./ =~ e }
 else
