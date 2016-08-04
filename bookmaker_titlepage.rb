@@ -84,6 +84,9 @@ puts ptparr
 
 if etparr.any?
   epubtitlepage = etparr.find { |e| /[\/|\\]epubtitlepage\./ =~ e }
+  if epubtitlepage.nil?
+    epubtitlepage = File.join(coverdir, "epubtitlepage.jpg")
+  end
 else
   epubtitlepage = File.join(coverdir, "epubtitlepage.jpg")
 end
@@ -92,6 +95,9 @@ puts epubtitlepage
 
 if ptparr.any?
   podtitlepage = ptparr.find { |e| /[\/|\\]titlepage\./ =~ e }
+  if podtitlepage.nil?
+    podtitlepage = File.join(coverdir, "titlepage.jpg")
+  end
 else
   podtitlepage = File.join(coverdir, "titlepage.jpg")
 end
