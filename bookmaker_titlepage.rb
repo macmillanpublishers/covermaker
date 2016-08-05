@@ -74,7 +74,43 @@ template_html = File.join(Bkmkr::Paths.project_tmp_dir, "titlepage.html")
 pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css")
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
 cover_pdf = File.join(coverdir, "titlepage.pdf")
-final_cover = File.join(coverdir, "epubtitlepage.jpg")
+
+# find titlepage images
+allimg = File.join(coverdir, "*")
+etparr = Dir[allimg].select { |f| f.include?('epubtitlepage.')}
+ptparr = Dir[allimg].select { |f| f.include?('titlepage.')}
+
+puts ptparr
+
+if etparr.any?
+  epubtitlepage = etparr.find { |e| /[\/|\\]epubtitlepage\./ =~ e }
+  if epubtitlepage.nil?
+    epubtitlepage = File.join(coverdir, "epubtitlepage.jpg")
+  end
+else
+  epubtitlepage = File.join(coverdir, "epubtitlepage.jpg")
+end
+
+puts epubtitlepage
+
+if ptparr.any?
+  podtitlepage = ptparr.find { |e| /[\/|\\]titlepage\./ =~ e }
+  if podtitlepage.nil?
+    podtitlepage = File.join(coverdir, "titlepage.jpg")
+  end
+else
+  podtitlepage = File.join(coverdir, "titlepage.jpg")
+end
+
+puts podtitlepage
+
+if File.file?(epubtitlepage)
+  final_cover = epubtitlepage
+elsif File.file?(podtitlepage)
+  final_cover = podtitlepage
+else
+  final_cover = epubtitlepage
+end
 
 puts "RUNNING TITLEPAGEMAKER"
 
@@ -171,9 +207,19 @@ final_dir = File.join(Bkmkr::Paths.done_dir, pisbn)
 final_dir_images = File.join(Bkmkr::Paths.done_dir, pisbn, "images")
 logdir = File.join(Bkmkr::Paths.done_dir, pisbn, "logs")
 titlepagelog = File.join(logdir, "titlepage.txt")
-arch_cover = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
+arch_podtp = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
+arch_epubtp = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "epubtitlepage.jpg")
 gen = false
 
+if File.file?(arch_epubtp)
+  arch_cover = arch_epubtp
+elsif File.file?(arch_podtp)
+  arch_cover = arch_podtp
+else
+  arch_cover = arch_podtp
+end
+
+# check to see if a titlepage image already exists
 if File.file?(titlepagelog) and !File.file?(final_cover)
   gen = true
   Mcmlln::Tools.deleteFile(titlepagelog)
