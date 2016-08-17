@@ -38,7 +38,7 @@ def findSpecificISBN(file, string, type)
     end
   end
   isbn_basestring = pisbn.shift
-  unless isbn_basestring.length == 0
+  unless isbn_basestring.nil?
     isbn_basestring = isbn_basestring.to_s.gsub(/\D/,"")
     isbn = isbn_basestring.match(/978(\d{10})/).to_s
   else
