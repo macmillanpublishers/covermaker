@@ -61,9 +61,9 @@ project_dir = data_hash['project']
 stage_dir = data_hash['stage']
 resource_dir = data_hash['resourcedir']
 
-# Authentication data is required to use docraptor and 
-# to post images and other assets to the ftp for inclusion 
-# via docraptor. This auth data should be housed in 
+# Authentication data is required to use docraptor and
+# to post images and other assets to the ftp for inclusion
+# via docraptor. This auth data should be housed in
 # separate files, as laid out in the following block.
 docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_key.txt")
 ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
@@ -198,7 +198,7 @@ embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
 # do content conversions
 Bkmkr::Tools.runnode(gettitlepagejs, "#{Bkmkr::Paths.outputtmp_html} #{template_html}")
 
-pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>").to_s
+pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>")..gsub(/(<p class="TitlepageLogologo">)(<strong class="spanboldfacecharactersbf">\[(\w| )*\]<\/strong>)/,"\\1<img src=\"https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/#{resource_dir}/logo.jpg\"/>").to_s
 
 # Docraptor setup
 DocRaptor.api_key "#{Bkmkr::Keys.docraptor_key}"
@@ -222,7 +222,7 @@ unless gen == false
   	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
                                  :javascript       => "true"
   							             }
-                         		)                         
+                         		)
   end
   # convert to jpg
   `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
