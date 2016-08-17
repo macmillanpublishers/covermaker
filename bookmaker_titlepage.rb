@@ -47,11 +47,31 @@ def findSpecificISBN(file, string, type)
   return isbn
 end
 
+# determine directory name for assets e.g. css, js, logo images
+def getResourceDir(imprint, json)
+  data_hash = Mcmlln::Tools.readjson(json)
+  arr = []
+  # loop through each json record to see if imprint name matches formalname
+  data_hash['imprints'].each do |p|
+    if p['formalname'] == imprint
+      arr << p['shortname']
+    end
+  end
+  # in case of multiples, grab just the last entry and return it
+  if arr.nil? or arr.empty?
+    path = "generic"
+  else
+    path = arr.pop
+  end
+  return path
+end
+
 # ---------------------- PROCESSES
 
 # Local path var(s)
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
 pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
+imprint_json = File.join(Bkmkr::Paths.scripts_dir, "bookmaker_addons", "imprints.json")
 
 configfile = File.join(Bkmkr::Paths.project_tmp_dir, "config.json")
 data_hash = Mcmlln::Tools.readjson(configfile)
@@ -125,13 +145,19 @@ looseisbn = findAnyISBN(Bkmkr::Paths.outputtmp_html)
 pisbn = ""
 eisbn = ""
 isbnhash = {}
+imprint = ""
 
-# query biblio, get WORK_ID
+# query biblio, get WORK_ID and imprint (for sourcing logo)
 if looseisbn.length == 13
   puts "Searching data warehouse for ISBN: #{looseisbn}"
   thissql = exactSearchSingleKey(looseisbn, "EDITION_EAN")
   isbnhash = runQuery(thissql)
+  imprint = isbnhash["book"]["IMPRINT_DESC"]
 end
+
+#getting resource_dir based on imprint
+resource_dir = getResourceDir(imprint, imprint_json)
+puts "Resource dir: #{resource_dir}"
 
 # we'll use this later to find the cover file
 allworks = []

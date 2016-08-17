@@ -487,10 +487,10 @@ section[data-type="titlepage"] *[class*="TitlepageImprintLineimp"] {
 	text-align: center;
 	text-indent: 0;
 }
-/*
+
 section[data-type="titlepage"] *[class*="TitlepageLogologo"] {
-	content: " ";
-	background-image: url('https://raw.githubusercontent.com/macmillanpublishers/covermaker/master/images/swerve/logo.png');
+	/*content: " ";
+	background-image: url('https://raw.githubusercontent.com/macmillanpublishers/covermaker/master/images/swerve/logo.png');*/
 	background-position: center bottom;
 	background-size: auto 1.8in;
 	background-repeat: no-repeat;
@@ -501,7 +501,11 @@ section[data-type="titlepage"] *[class*="TitlepageLogologo"] {
 	text-align: center;
 	margin-bottom: 0.2in;
 }
-*/
+
+section[data-type="titlepage"] *[class*="TitlepageLogologo"] img {
+	max-height: 100%;
+}
+
 *[class*="TitlepageCitiescit"], *[class*="TitlepagePublisherNamepub"], *[class*="TitlepageImprintLineimp"] {
 	font-family: "ArnoPro", serif;
 	font-variant: small-caps;
@@ -1338,11 +1342,6 @@ p.BookmakerPageBreakbr,
 
 *[class*="loosen"], .bookmakerloosenbkl {
   letter-spacing: 0.2pt;
-}
-
-section[data-type="titlepage"] *[class*="TitlepageLogologo"] {
-  background-image: url("http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerassets/swerve/logo.jpg");
-  background-size: 2in auto;
 }
 
 section[data-type="preface"] {
