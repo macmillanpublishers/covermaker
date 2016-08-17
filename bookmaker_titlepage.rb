@@ -10,7 +10,7 @@ require_relative '../utilities/oraclequery.rb'
 # find any tagged isbn in an html file
 def findAnyISBN(file)
   isbn_basestring = File.read(file).match(/spanISBNisbn">\s*978(\D?\d?){10}<\/span>/)
-  unless isbn_basestring.length == 0
+  unless isbn_basestring.nil?
     isbn_basestring = isbn_basestring.to_s.gsub(/\D/,"")
     isbn = isbn_basestring.match(/978(\d{10})/).to_s
   else
