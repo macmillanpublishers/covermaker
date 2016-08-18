@@ -504,6 +504,7 @@ section[data-type="titlepage"] *[class*="TitlepageLogologo"] {
 
 section[data-type="titlepage"] *[class*="TitlepageLogologo"] img {
 	max-height: 100%;
+	max-width: 1in;
 }
 
 *[class*="TitlepageCitiescit"], *[class*="TitlepagePublisherNamepub"], *[class*="TitlepageImprintLineimp"] {
