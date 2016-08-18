@@ -15,11 +15,9 @@ fs.readFile(file, function editContent (err, contents) {
   if ( $('.TitlepageLogologo').length ) {
     var logoimg = '<img src="https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/RESOURCEDIR/logo.jpg"></img>';
     $('.TitlepageLogologo').empty().append(logoimg);
-    console.log('YES');
   } else { 
     var logoholder = '<p class="TitlepageLogologo"><img src="https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/RESOURCEDIR/logo.jpg"/></p>';
     $('section[data-type="titlepage"]').append(logoholder);
-    console.log('NO');
   };
 
   var content = $('section[data-type="titlepage"]');
