@@ -10,7 +10,7 @@ require_relative '../utilities/oraclequery.rb'
 # find any tagged isbn in an html file
 def findAnyISBN(file)
   isbn_basestring = File.read(file).match(/spanISBNisbn">\s*978(\D?\d?){10}<\/span>/)
-  unless isbn_basestring.length == 0
+  unless isbn_basestring.nil?
     isbn_basestring = isbn_basestring.to_s.gsub(/\D/,"")
     isbn = isbn_basestring.match(/978(\d{10})/).to_s
   else
@@ -38,7 +38,7 @@ def findSpecificISBN(file, string, type)
     end
   end
   isbn_basestring = pisbn.shift
-  unless isbn_basestring.length == 0
+  unless isbn_basestring.nil?
     isbn_basestring = isbn_basestring.to_s.gsub(/\D/,"")
     isbn = isbn_basestring.match(/978(\d{10})/).to_s
   else
@@ -47,11 +47,31 @@ def findSpecificISBN(file, string, type)
   return isbn
 end
 
+# determine directory name for assets e.g. css, js, logo images
+def getResourceDir(imprint, json)
+  data_hash = Mcmlln::Tools.readjson(json)
+  arr = []
+  # loop through each json record to see if imprint name matches formalname
+  data_hash['imprints'].each do |p|
+    if p['formalname'] == imprint
+      arr << p['shortname']
+    end
+  end
+  # in case of multiples, grab just the last entry and return it
+  if arr.nil? or arr.empty?
+    path = "generic"
+  else
+    path = arr.pop
+  end
+  return path
+end
+
 # ---------------------- PROCESSES
 
 # Local path var(s)
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
 pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
+imprint_json = File.join(Bkmkr::Paths.scripts_dir, "bookmaker_addons", "imprints.json")
 
 configfile = File.join(Bkmkr::Paths.project_tmp_dir, "config.json")
 data_hash = Mcmlln::Tools.readjson(configfile)
@@ -61,9 +81,9 @@ project_dir = data_hash['project']
 stage_dir = data_hash['stage']
 resource_dir = data_hash['resourcedir']
 
-# Authentication data is required to use docraptor and 
-# to post images and other assets to the ftp for inclusion 
-# via docraptor. This auth data should be housed in 
+# Authentication data is required to use docraptor and
+# to post images and other assets to the ftp for inclusion
+# via docraptor. This auth data should be housed in
 # separate files, as laid out in the following block.
 docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_key.txt")
 ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
@@ -125,13 +145,19 @@ looseisbn = findAnyISBN(Bkmkr::Paths.outputtmp_html)
 pisbn = ""
 eisbn = ""
 isbnhash = {}
+imprint = ""
 
-# query biblio, get WORK_ID
+# query biblio, get WORK_ID and imprint (for sourcing logo)
 if looseisbn.length == 13
   puts "Searching data warehouse for ISBN: #{looseisbn}"
   thissql = exactSearchSingleKey(looseisbn, "EDITION_EAN")
   isbnhash = runQuery(thissql)
+  imprint = isbnhash["book"]["IMPRINT_DESC"]
 end
+
+#getting resource_dir based on imprint
+resource_dir = getResourceDir(imprint, imprint_json)
+puts "Resource dir: #{resource_dir}"
 
 # we'll use this later to find the cover file
 allworks = []
@@ -244,7 +270,7 @@ embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
 # do content conversions
 Bkmkr::Tools.runnode(gettitlepagejs, "#{Bkmkr::Paths.outputtmp_html} #{template_html}")
 
-pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>").to_s
+pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>").gsub(/(<p class="TitlepageLogologo">)(<strong class="spanboldfacecharactersbf">\[(\w| )*\]<\/strong>)/,"\\1<img src=\"https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/#{resource_dir}/logo.jpg\"/>").to_s
 
 # Docraptor setup
 DocRaptor.api_key "#{Bkmkr::Keys.docraptor_key}"
@@ -268,7 +294,7 @@ unless gen == false
   	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
                                  :javascript       => "true"
   							             }
-                         		)                         
+                         		)
   end
   # convert to jpg
   `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
