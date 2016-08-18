@@ -8,8 +8,16 @@ fs.readFile(file, function editContent (err, contents) {
           xmlMode: true
         });
 
-  if ($('.TitlepageBookSubtitlestit + .TitlepageAuthorNameau').length > 1 ) {
+  if ( $('.TitlepageBookSubtitlestit + .TitlepageAuthorNameau').length ) {
     $('section[data-type="titlepage"]').addClass("anthology");
+  };
+
+  if ( $('.TitlepageLogologo').length ) {
+    var logoimg = '<img src="https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/RESOURCEDIR/logo.jpg"></img>';
+    $('.TitlepageLogologo').empty().append(logoimg);
+  } else { 
+    var logoholder = '<p class="TitlepageLogologo"><img src="https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/RESOURCEDIR/logo.jpg"/></p>';
+    $('section[data-type="titlepage"]').append(logoholder);
   };
 
   var content = $('section[data-type="titlepage"]');

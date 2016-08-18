@@ -270,7 +270,8 @@ embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
 # do content conversions
 Bkmkr::Tools.runnode(gettitlepagejs, "#{Bkmkr::Paths.outputtmp_html} #{template_html}")
 
-pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>").gsub(/(<p class="TitlepageLogologo">)(<strong class="spanboldfacecharactersbf">\[(\w| )*\]<\/strong>)/,"\\1<img src=\"https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/#{resource_dir}/logo.jpg\"/>").to_s
+pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>")
+                                   .gsub(/RESOURCEDIR/,"#{resource_dir}").to_s
 
 # Docraptor setup
 DocRaptor.api_key "#{Bkmkr::Keys.docraptor_key}"
