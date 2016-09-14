@@ -173,12 +173,16 @@ unless isbnhash.nil? or isbnhash.empty? or !isbnhash or isbnhash['book'].nil? or
       allworks.push(v['EDITION_EAN'])
       # find a print product if it exists
       if v['PRODUCTTYPE_DESC'] and v['PRODUCTTYPE_DESC'] == "Book"
-        pisbn = v['EDITION_EAN']
-        puts "Found a print product: #{pisbn}"
+        if v['EDITION_EAN'].length == 13
+          pisbn = v['EDITION_EAN']
+          puts "Found a print product: #{pisbn}"
+        end
       # find an ebook product if it exists
       elsif v['PRODUCTTYPE_DESC'] and v['PRODUCTTYPE_DESC'] == "EBook"
-        eisbn = v['EDITION_EAN']
-        puts "Found an ebook product: #{eisbn}"
+        if v['EDITION_EAN'].length == 13
+          eisbn = v['EDITION_EAN']
+          puts "Found an ebook product: #{eisbn}"
+        end  
       end
     end
   end
