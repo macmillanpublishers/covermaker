@@ -61,9 +61,9 @@ project_dir = data_hash['project']
 stage_dir = data_hash['stage']
 resource_dir = data_hash['resourcedir']
 
-# Authentication data is required to use docraptor and 
-# to post images and other assets to the ftp for inclusion 
-# via docraptor. This auth data should be housed in 
+# Authentication data is required to use docraptor and
+# to post images and other assets to the ftp for inclusion
+# via docraptor. This auth data should be housed in
 # separate files, as laid out in the following block.
 docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_key.txt")
 ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
@@ -111,12 +111,16 @@ unless isbnhash.nil? or isbnhash.empty? or !isbnhash or isbnhash['book'].nil? or
       allworks.push(v['EDITION_EAN'])
       # find a print product if it exists
       if v['PRODUCTTYPE_DESC'] and v['PRODUCTTYPE_DESC'] == "Book"
-        pisbn = v['EDITION_EAN']
-        puts "Found a print product: #{pisbn}"
+        if v['EDITION_EAN'].length == 13
+          pisbn = v['EDITION_EAN']
+          puts "Found a print product: #{pisbn}"
+        end
       # find an ebook product if it exists
       elsif v['PRODUCTTYPE_DESC'] and v['PRODUCTTYPE_DESC'] == "EBook"
-        eisbn = v['EDITION_EAN']
-        puts "Found an ebook product: #{eisbn}"
+        if v['EDITION_EAN'].length == 13
+          eisbn = v['EDITION_EAN']
+          puts "Found an ebook product: #{eisbn}"
+        end  
       end
     end
   end
@@ -222,7 +226,7 @@ unless gen == false
   	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
                                  :javascript       => "true"
   							             }
-                         		)                         
+                         		)
   end
   # convert to jpg
   `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
