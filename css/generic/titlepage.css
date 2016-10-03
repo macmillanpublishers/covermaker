@@ -498,6 +498,7 @@ section[data-type="titlepage"] *[class*="TitlepageLogologo"] {
 	float: bottom;
 	width: 100%;
 	height: 0.5in;
+	text-indent: 0;
 	text-align: center;
 	margin-bottom: 0.2in;
 }
