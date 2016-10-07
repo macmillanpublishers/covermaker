@@ -4,6 +4,7 @@ require 'fileutils'
 
 require_relative '../bookmaker/core/header.rb'
 require_relative '../utilities/oraclequery.rb'
+require_relative '../utilities/isbn_finder.rb'
 
 # ---------------------- METHODS
 
