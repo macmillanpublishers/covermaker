@@ -48,6 +48,21 @@ def findSpecificISBN(file, string, type)
   return isbn
 end
 
+def findImprint(pisbn, eisbn)
+  if pisbn.length == 13
+    thissql = exactSearchSingleKey(pisbn, "EDITION_EAN")
+    isbnhash = runQuery(thissql)
+    imprint = isbnhash["book"]["IMPRINT_DESC"]
+  elsif eisbn.length == 13
+    thissql = exactSearchSingleKey(eisbn, "EDITION_EAN")
+    isbnhash = runQuery(thissql)
+    imprint = isbnhash["book"]["IMPRINT_DESC"]
+  else
+    imprint = "Macmillan"
+  end
+  return imprint
+end
+
 # determine directory name for assets e.g. css, js, logo images
 def getResourceDir(imprint, json)
   data_hash = Mcmlln::Tools.readjson(json)
@@ -142,6 +157,9 @@ multiple_isbns = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn">\s*.
 
 # determine ISBNs
 pisbn, eisbn = findBookISBNs(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename)
+
+# get imprint for logo placement
+imprint = findImprint(pisbn, eisbn)
 
 # --------------- FINISH ISBN FINDER
 
