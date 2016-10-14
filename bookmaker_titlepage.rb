@@ -53,12 +53,15 @@ def findImprint(pisbn, eisbn)
     thissql = exactSearchSingleKey(pisbn, "EDITION_EAN")
     isbnhash = runQuery(thissql)
     imprint = isbnhash["book"]["IMPRINT_DESC"]
+    puts "Found imprint in DW: #{imprint}"
   elsif eisbn.length == 13
     thissql = exactSearchSingleKey(eisbn, "EDITION_EAN")
     isbnhash = runQuery(thissql)
     imprint = isbnhash["book"]["IMPRINT_DESC"]
+    puts "Found imprint in DW: #{imprint}"
   else
     imprint = "Macmillan"
+    puts "No imprint found in DW; using default imprint: #{imprint}"
   end
   return imprint
 end
