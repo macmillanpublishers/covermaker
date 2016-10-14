@@ -164,6 +164,10 @@ pisbn, eisbn = findBookISBNs(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filenam
 # get imprint for logo placement
 imprint = findImprint(pisbn, eisbn)
 
+# getting resource_dir based on imprint, for logo
+resource_dir = getResourceDir(imprint, imprint_json)
+puts "Resource dir: #{resource_dir}"
+
 # --------------- FINISH ISBN FINDER
 
 # must go after the isbn finder
