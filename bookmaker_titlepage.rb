@@ -159,7 +159,7 @@ spanisbn = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn/)
 multiple_isbns = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand)|(e\s*-*\s*book))\)/)
 
 # determine ISBNs
-pisbn, eisbn = findBookISBNs(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename)
+pisbn, eisbn, allworks = findBookISBNs(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename)
 
 # get imprint for logo placement
 imprint = findImprint(pisbn, eisbn)
