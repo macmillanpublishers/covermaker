@@ -52,13 +52,23 @@ def findImprint(pisbn, eisbn)
   if pisbn.length == 13
     thissql = exactSearchSingleKey(pisbn, "EDITION_EAN")
     isbnhash = runQuery(thissql)
-    imprint = isbnhash["book"]["IMPRINT_DESC"]
-    puts "Found imprint in DW: #{imprint}"
+    unless isbnhash.nil? or isbnhash.empty? or !isbnhash
+      imprint = isbnhash["book"]["IMPRINT_DESC"]
+      puts "Found imprint in DW: #{imprint}"
+    else
+      imprint = "Macmillan"
+      puts "Unable to connect to DW; using default imprint: #{imprint}"
+    end
   elsif eisbn.length == 13
     thissql = exactSearchSingleKey(eisbn, "EDITION_EAN")
     isbnhash = runQuery(thissql)
-    imprint = isbnhash["book"]["IMPRINT_DESC"]
-    puts "Found imprint in DW: #{imprint}"
+    unless isbnhash.nil? or isbnhash.empty? or !isbnhash
+      imprint = isbnhash["book"]["IMPRINT_DESC"]
+      puts "Found imprint in DW: #{imprint}"
+    else
+      imprint = "Macmillan"
+      puts "Unable to connect to DW; using default imprint: #{imprint}"
+    end
   else
     imprint = "Macmillan"
     puts "No imprint found in DW; using default imprint: #{imprint}"
@@ -159,7 +169,7 @@ spanisbn = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn/)
 multiple_isbns = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand)|(e\s*-*\s*book))\)/)
 
 # determine ISBNs
-pisbn, eisbn = findBookISBNs(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename)
+pisbn, eisbn, allworks = findBookISBNs(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename)
 
 # get imprint for logo placement
 imprint = findImprint(pisbn, eisbn)
