@@ -97,6 +97,25 @@ end
 
 # ---------------------- PROCESSES
 
+puts "RUNNING TITLEPAGEMAKER"
+
+# --------------- ISBN FINDER COPIED FROM BOOKMAKER_ADDONS/METADATA_PREPROCESSING
+# testing to see if ISBN style exists
+spanisbn = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn/)
+multiple_isbns = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand)|(e\s*-*\s*book))\)/)
+
+# determine ISBNs
+pisbn, eisbn, allworks = findBookISBNs(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename)
+
+# get imprint for logo placement
+imprint = findImprint(pisbn, eisbn)
+
+# getting resource_dir based on imprint, for logo
+resource_dir = getResourceDir(imprint, imprint_json)
+puts "Resource dir: #{resource_dir}"
+
+# --------------- FINISH ISBN FINDER
+
 # Local path var(s)
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
 pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
@@ -118,14 +137,34 @@ docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_ke
 ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
 ftp_pass = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_pass.txt")
 ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
-coverdir = Bkmkr::Paths.submitted_images
+submitted_images = Bkmkr::Paths.submitted_images
 template_html = File.join(Bkmkr::Paths.project_tmp_dir, "titlepage.html")
 pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css")
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
-cover_pdf = File.join(coverdir, "titlepage.pdf")
 
-# find titlepage images
-allimg = File.join(coverdir, "*")
+# paths that depend on the ISBN; must follow the isbn_finder
+coverdir = File.join(Bkmkr::Paths.done_dir, pisbn)
+cover_pdf = File.join(coverdir, "titlepage.pdf")
+final_dir = File.join(Bkmkr::Paths.done_dir, pisbn)
+final_dir_images = File.join(Bkmkr::Paths.done_dir, pisbn, "images")
+logdir = File.join(Bkmkr::Paths.done_dir, pisbn, "logs")
+titlepagelog = File.join(logdir, "titlepage.txt")
+arch_podtp = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
+arch_epubtp = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "epubtitlepage.jpg")
+
+# create the final archive dirs if they don't exist yet
+unless Dir.exist?(final_dir)
+  Mcmlln::Tools.makeDir(final_dir)
+  Mcmlln::Tools.makeDir(final_dir_images)
+end
+
+# create the logging dir if it doesn't exist yet
+unless Dir.exist?(logdir)
+  Mcmlln::Tools.makeDir(logdir)
+end
+
+# find any new user-submitted titlepage images
+allimg = File.join(submitted_images, "*")
 etparr = Dir[allimg].select { |f| f.include?('epubtitlepage.')}
 ptparr = Dir[allimg].select { |f| f.include?('titlepage.')}
 
@@ -153,6 +192,10 @@ end
 
 puts podtitlepage
 
+# if an epub-specific titlepage file has been submitted, use that;
+# otherwise use the POD coverpage if it exists;
+# and if neither exists, we'll create the epubtitlepage.
+# (POD titlepage images should only be submitted manually by the user, never created programatically.)
 if File.file?(epubtitlepage)
   final_cover = epubtitlepage
 elsif File.file?(podtitlepage)
@@ -161,32 +204,6 @@ else
   final_cover = epubtitlepage
 end
 
-puts "RUNNING TITLEPAGEMAKER"
-
-# --------------- ISBN FINDER COPIED FROM BOOKMAKER_ADDONS/METADATA_PREPROCESSING
-# testing to see if ISBN style exists
-spanisbn = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn/)
-multiple_isbns = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand)|(e\s*-*\s*book))\)/)
-
-# determine ISBNs
-pisbn, eisbn, allworks = findBookISBNs(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename)
-
-# get imprint for logo placement
-imprint = findImprint(pisbn, eisbn)
-
-# getting resource_dir based on imprint, for logo
-resource_dir = getResourceDir(imprint, imprint_json)
-puts "Resource dir: #{resource_dir}"
-
-# --------------- FINISH ISBN FINDER
-
-# must go after the isbn finder
-final_dir = File.join(Bkmkr::Paths.done_dir, pisbn)
-final_dir_images = File.join(Bkmkr::Paths.done_dir, pisbn, "images")
-logdir = File.join(Bkmkr::Paths.done_dir, pisbn, "logs")
-titlepagelog = File.join(logdir, "titlepage.txt")
-arch_podtp = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
-arch_epubtp = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "epubtitlepage.jpg")
 gen = false
 
 if File.file?(arch_epubtp)
@@ -253,17 +270,6 @@ unless gen == false
   `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
 
   FileUtils.rm(cover_pdf)
-
-  # create the final archive dirs if they don't exist yet
-  unless Dir.exist?(final_dir)
-    Mcmlln::Tools.makeDir(final_dir)
-    Mcmlln::Tools.makeDir(final_dir_images)
-  end
-
-  # create the logging dir if it doesn't exist yet
-  unless Dir.exist?(logdir)
-    Mcmlln::Tools.makeDir(logdir)
-  end
 
   # write the titlepage gen log
   File.open(titlepagelog, 'w+') do |f|
