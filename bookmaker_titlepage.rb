@@ -99,6 +99,19 @@ end
 
 puts "RUNNING TITLEPAGEMAKER"
 
+# paths to key scripts and JSON metadata
+pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
+pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
+imprint_json = File.join(Bkmkr::Paths.scripts_dir, "bookmaker_addons", "imprints.json")
+
+configfile = File.join(Bkmkr::Paths.project_tmp_dir, "config.json")
+data_hash = Mcmlln::Tools.readjson(configfile)
+
+# the cover filename and metadata
+project_dir = data_hash['project']
+stage_dir = data_hash['stage']
+resource_dir = data_hash['resourcedir']
+
 # --------------- ISBN FINDER COPIED FROM BOOKMAKER_ADDONS/METADATA_PREPROCESSING
 # testing to see if ISBN style exists
 spanisbn = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn/)
@@ -116,19 +129,6 @@ puts "Resource dir: #{resource_dir}"
 
 # --------------- FINISH ISBN FINDER
 
-# Local path var(s)
-pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
-pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
-imprint_json = File.join(Bkmkr::Paths.scripts_dir, "bookmaker_addons", "imprints.json")
-
-configfile = File.join(Bkmkr::Paths.project_tmp_dir, "config.json")
-data_hash = Mcmlln::Tools.readjson(configfile)
-
-# the cover filename and metadata
-project_dir = data_hash['project']
-stage_dir = data_hash['stage']
-resource_dir = data_hash['resourcedir']
-
 # Authentication data is required to use docraptor and
 # to post images and other assets to the ftp for inclusion
 # via docraptor. This auth data should be housed in
@@ -143,7 +143,7 @@ pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css")
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
 
 # paths that depend on the ISBN; must follow the isbn_finder
-coverdir = File.join(Bkmkr::Paths.done_dir, pisbn)
+coverdir = File.join(Bkmkr::Paths.done_dir, pisbn, "images")
 cover_pdf = File.join(coverdir, "titlepage.pdf")
 final_dir = File.join(Bkmkr::Paths.done_dir, pisbn)
 final_dir_images = File.join(Bkmkr::Paths.done_dir, pisbn, "images")
