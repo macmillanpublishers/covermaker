@@ -179,8 +179,6 @@ else
   epubtitlepage = File.join(coverdir, "epubtitlepage.jpg")
 end
 
-puts epubtitlepage
-
 if ptparr.any?
   podtitlepage = ptparr.find { |e| /[\/|\\]titlepage\./ =~ e }
   if podtitlepage.nil?
@@ -189,8 +187,6 @@ if ptparr.any?
 else
   podtitlepage = File.join(coverdir, "titlepage.jpg")
 end
-
-puts podtitlepage
 
 # if an epub-specific titlepage file has been submitted, use that;
 # otherwise use the POD coverpage if it exists;
@@ -204,8 +200,10 @@ else
   final_cover = epubtitlepage
 end
 
+# set the default switch to generate the titlepage
 gen = false
 
+# determine whether there are any titlepage images in the done dir from previous runs
 if File.file?(arch_epubtp)
   arch_cover = arch_epubtp
 elsif File.file?(arch_podtp)
@@ -214,20 +212,24 @@ else
   arch_cover = arch_podtp
 end
 
-# check to see if a titlepage image already exists
+# Determine whether or not to generate a titlepage.
+# First check: if a titlepage has previously been generated, and no new image has been submitted by the user
 if File.file?(titlepagelog) and !File.file?(final_cover)
   gen = true
   Mcmlln::Tools.deleteFile(titlepagelog)
   Mcmlln::Tools.deleteFile(arch_cover)
+# Then check: if a titlepage has previously been generated, but there IS a new image submitted by the user
 elsif File.file?(titlepagelog) and File.file?(final_cover)
   gen = false
   Mcmlln::Tools.deleteFile(titlepagelog)
   Mcmlln::Tools.deleteFile(arch_cover)
+# Finally: if no titlepage has ever been generated, and no new image has been submitted, 
+# and there is no existing image archived from a previous run
 elsif !File.file?(titlepagelog) and !File.file?(final_cover) and !File.file?(arch_cover)
   gen = true
 end
 
-# pdf css to be added to the file that will be sent to docraptor
+# CSS that will format the final titlepage PDF
 if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/titlepage.css")
   cover_css_file = File.join(pdf_css_dir, project_dir, "titlepage.css")
 else
@@ -236,7 +238,7 @@ end
 
 embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
 
-# do content conversions
+# prepare the HTML from which to generate the titlepage PDF
 Bkmkr::Tools.runnode(gettitlepagejs, "#{Bkmkr::Paths.outputtmp_html} #{template_html}")
 
 pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>")
@@ -249,7 +251,7 @@ DocRaptor.api_key "#{Bkmkr::Keys.docraptor_key}"
 testing_value = "false"
 if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "true" end
 
-# sends file to docraptor for conversion
+# Create the titlepage PDF
 unless gen == false
   puts "Generating titlepage."
   FileUtils.cd(coverdir)
@@ -266,12 +268,13 @@ unless gen == false
   							             }
                          		)
   end
-  # convert to jpg
+  # convert the PDF to jpg
   `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
 
+  # delete the now-useless PDF file
   FileUtils.rm(cover_pdf)
 
-  # write the titlepage gen log
+  # write the titlepage gen log, from which we determine whether titlepages have been created in the past
   File.open(titlepagelog, 'w+') do |f|
     f.puts Time.now
     f.puts "titlepage generated from document section.titlepage"
