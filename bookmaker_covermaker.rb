@@ -20,9 +20,9 @@ project_dir = data_hash['project']
 stage_dir = data_hash['stage']
 resource_dir = data_hash['resourcedir']
 
-# Authentication data is required to use docraptor and 
-# to post images and other assets to the ftp for inclusion 
-# via docraptor. This auth data should be housed in 
+# Authentication data is required to use docraptor and
+# to post images and other assets to the ftp for inclusion
+# via docraptor. This auth data should be housed in
 # separate files, as laid out in the following block.
 docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_key.txt")
 ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
@@ -144,19 +144,21 @@ elsif gen == true
   	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
                                  :javascript       => "true"
   							             }
-                         		)                     
+                         		)
   end
 
   # convert to jpg
   `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
 
+  sleep 5 #trying to prevent intermittent permission errors when deleting the PDF
+
   # delete the PDF
   FileUtils.rm(cover_pdf)
-  
+
   unless Dir.exist?(logdir)
     Mcmlln::Tools.makeDir(logdir)
   end
-  
+
   File.open(coverlog, 'w+') do |f|
     f.puts Time.now
     f.puts "cover generated from document metadata"
