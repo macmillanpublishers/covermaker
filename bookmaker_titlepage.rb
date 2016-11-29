@@ -223,7 +223,7 @@ elsif File.file?(titlepagelog) and File.file?(final_cover)
   gen = false
   Mcmlln::Tools.deleteFile(titlepagelog)
   Mcmlln::Tools.deleteFile(arch_cover)
-# Finally: if no titlepage has ever been generated, and no new image has been submitted, 
+# Finally: if no titlepage has ever been generated, and no new image has been submitted,
 # and there is no existing image archived from a previous run
 elsif !File.file?(titlepagelog) and !File.file?(final_cover) and !File.file?(arch_cover)
   gen = true
@@ -270,6 +270,8 @@ unless gen == false
   end
   # convert the PDF to jpg
   `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
+
+  sleep 5 #trying to prevent intermittent permission errors when deleting the PDF
 
   # delete the now-useless PDF file
   FileUtils.rm(cover_pdf)
