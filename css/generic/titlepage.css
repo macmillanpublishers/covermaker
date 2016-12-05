@@ -510,6 +510,7 @@ section[data-type="titlepage"] *[class*="TitlepageLogologo"] {
 	text-indent: 0;
 	text-align: center;
 	margin-bottom: 0.2in;
+	margin-top: 48pt;
 }
 
 section[data-type="titlepage"] *[class*="TitlepageLogologo"] img {
