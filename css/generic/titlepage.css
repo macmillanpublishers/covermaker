@@ -468,18 +468,27 @@ h1 + *[class*="TitlepageSeriesTitleser"] {
 	text-align: center;
 }
 
-section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] {
+*[class*="TitlepageAuthorNameau"] {
 	font-size: 16pt;
-	padding-top: 40pt;
-	background-image: url('http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerassets/titlepage-rule.jpg');
-	background-size: 60pt auto;
-	background-position: top;
-	background-repeat: no-repeat;
-	margin-top: 24pt;
-	margin-bottom: 32pt;
 	text-indent: 0;
 	text-align: center;
+	text-transform: uppercase;
 	string-set: author content();
+}
+
+section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] {
+	float: bottom;
+	margin-top: 32pt;
+}
+
+section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] + *[class*="TitlepageAuthorNameau"] {
+	float: bottom;
+	margin-top: 16pt;
+}
+
+section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"]:last-of-type,
+section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] + *[class*="TitlepageAuthorNameau"]:last-of-type {
+	margin-bottom: 64pt;
 }
 
 section[data-type="titlepage"] *[class*="TitlepageImprintLineimp"] {
@@ -501,6 +510,7 @@ section[data-type="titlepage"] *[class*="TitlepageLogologo"] {
 	text-indent: 0;
 	text-align: center;
 	margin-bottom: 0.2in;
+	margin-top: 48pt;
 }
 
 section[data-type="titlepage"] *[class*="TitlepageLogologo"] img {
