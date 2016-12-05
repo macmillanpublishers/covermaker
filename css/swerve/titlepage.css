@@ -493,6 +493,11 @@ section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] {
 	margin-top: 32pt;
 }
 
+section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] + *[class*="TitlepageAuthorNameau"] {
+	float: bottom;
+	margin-top: 16pt;
+}
+
 section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"]:last-of-type {
 	margin-bottom: 64pt;
 }

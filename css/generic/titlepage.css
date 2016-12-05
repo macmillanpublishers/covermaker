@@ -482,6 +482,12 @@ section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] {
 	string-set: author content();
 }
 
+section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] + *[class*="TitlepageAuthorNameau"] {
+	margin-top: 8pt;
+	margin-bottom: 8pt;
+	padding-top: 8pt;
+}
+
 section[data-type="titlepage"] *[class*="TitlepageImprintLineimp"] {
 	float: bottom;
 	text-align: center;
