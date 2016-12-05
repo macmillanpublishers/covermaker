@@ -271,16 +271,16 @@ unless gen == false
   # convert the PDF to jpg
   `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
 
-  sleep 5 #trying to prevent intermittent permission errors when deleting the PDF
-
-  # delete the now-useless PDF file
-  FileUtils.rm(cover_pdf)
-
   # write the titlepage gen log, from which we determine whether titlepages have been created in the past
   File.open(titlepagelog, 'w+') do |f|
     f.puts Time.now
     f.puts "titlepage generated from document section.titlepage"
   end
+
+  sleep 5 #trying to prevent intermittent permission errors when deleting the PDF
+
+  # delete the now-useless PDF file
+  FileUtils.rm(cover_pdf)
 end
 
 puts "FINISHED TITLEPAGEMAKER"
