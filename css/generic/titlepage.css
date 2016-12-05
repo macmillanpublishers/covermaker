@@ -488,7 +488,7 @@ section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] + *[class*="Tit
 
 section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"]:last-of-type,
 section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] + *[class*="TitlepageAuthorNameau"]:last-of-type {
-	margin-bottom: 128pt;
+	margin-bottom: 64pt;
 }
 
 section[data-type="titlepage"] *[class*="TitlepageImprintLineimp"] {
