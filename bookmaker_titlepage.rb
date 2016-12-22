@@ -226,6 +226,8 @@ elsif !File.file?(titlepagelog) and !File.file?(final_cover)
   gen = true
 end
 
+puts "Titlepage generation: #{gen}"
+
 # now that we've got the logic out of the way,
 # set a default value for the final titlepage, 
 # if no images were found above
