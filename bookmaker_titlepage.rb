@@ -204,8 +204,6 @@ if File.file?(newtitlepage)
   final_cover = newtitlepage
 end
 
-puts final_cover
-
 # set the default switch to generate the titlepage
 gen = false
 
@@ -235,8 +233,6 @@ puts "Titlepage generation: #{gen}"
 if final_cover.empty? or final_cover.nil?
   final_cover = arch_epubtp
 end
-
-puts final_cover
 
 # CSS that will format the final titlepage PDF
 if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/titlepage.css")
