@@ -224,6 +224,14 @@ elsif !File.file?(titlepagelog) and !File.file?(final_cover)
   gen = true
 end
 
+# now that we've got the logic out of the way,
+# set a default value for the final titlepage, 
+# if no images were found above
+
+if final_cover.empty? or final_cover.nil?
+  final_cover = arch_epubtp
+end
+
 # CSS that will format the final titlepage PDF
 if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/titlepage.css")
   cover_css_file = File.join(pdf_css_dir, project_dir, "titlepage.css")
