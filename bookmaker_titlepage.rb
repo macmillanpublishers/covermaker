@@ -163,69 +163,64 @@ unless Dir.exist?(logdir)
   Mcmlln::Tools.makeDir(logdir)
 end
 
+# find any archived titlepage images
+
+oldtitlepage = ""
+
+oldepubtitlepage = File.join(coverdir, "epubtitlepage.jpg")
+oldpodtitlepage = File.join(coverdir, "titlepage.jpg")
+
+if File.file?(oldepubtitlepage)
+  puts "Found an archived EPUB titlepage"
+  oldtitlepage = oldepubtitlepage
+elsif File.file?(oldpodtitlepage)
+  puts "Found an archived POD titlepage"
+  oldtitlepage = oldpodtitlepage
+end
+
 # find any new user-submitted titlepage images
 allimg = File.join(submitted_images, "*")
 etparr = Dir[allimg].select { |f| f.include?('epubtitlepage.')}
 ptparr = Dir[allimg].select { |f| f.include?('titlepage.')}
 
-puts ptparr
+newtitlepage = ""
 
 if etparr.any?
-  epubtitlepage = etparr.find { |e| /[\/|\\]epubtitlepage\./ =~ e }
-  if epubtitlepage.nil?
-    epubtitlepage = File.join(coverdir, "epubtitlepage.jpg")
-  end
-else
-  epubtitlepage = File.join(coverdir, "epubtitlepage.jpg")
-end
-
-if ptparr.any?
-  podtitlepage = ptparr.find { |e| /[\/|\\]titlepage\./ =~ e }
-  if podtitlepage.nil?
-    podtitlepage = File.join(coverdir, "titlepage.jpg")
-  end
-else
-  podtitlepage = File.join(coverdir, "titlepage.jpg")
+  puts "Found a new EPUB titlepage"
+  newtitlepage = etparr.find { |e| /[\/|\\]epubtitlepage\./ =~ e }
+elsif ptparr.any?
+  puts "Found a new POD titlepage"
+  newtitlepage = ptparr.find { |e| /[\/|\\]titlepage\./ =~ e }
 end
 
 # if an epub-specific titlepage file has been submitted, use that;
-# otherwise use the POD coverpage if it exists;
-# and if neither exists, we'll create the epubtitlepage.
+# otherwise use the new POD coverpage if it exists;
+# and if neither exists, we'll create the epubtitlepage, and set it to the final archival path.
 # (POD titlepage images should only be submitted manually by the user, never created programatically.)
-if File.file?(epubtitlepage)
-  final_cover = epubtitlepage
-elsif File.file?(podtitlepage)
-  final_cover = podtitlepage
-else
-  final_cover = epubtitlepage
+
+final_cover = oldtitlepage
+
+if File.file?(newtitlepage)
+  final_cover = newtitlepage
 end
 
 # set the default switch to generate the titlepage
 gen = false
 
-# determine whether there are any titlepage images in the done dir from previous runs
-if File.file?(arch_epubtp)
-  arch_cover = arch_epubtp
-elsif File.file?(arch_podtp)
-  arch_cover = arch_podtp
-else
-  arch_cover = arch_podtp
-end
-
 # Determine whether or not to generate a titlepage.
-# First check: if a titlepage has previously been generated, and no new image has been submitted by the user
-if File.file?(titlepagelog) and !File.file?(final_cover)
+# First check: if an epub titlepage has previously been generated, and no new image has been submitted by the user
+if File.file?(titlepagelog) and final_cover == oldepubtitlepage
   gen = true
   Mcmlln::Tools.deleteFile(titlepagelog)
-  Mcmlln::Tools.deleteFile(arch_cover)
+  Mcmlln::Tools.deleteFile(oldtitlepage)
 # Then check: if a titlepage has previously been generated, but there IS a new image submitted by the user
-elsif File.file?(titlepagelog) and File.file?(final_cover)
+elsif File.file?(titlepagelog) and File.file?(newtitlepage)
   gen = false
   Mcmlln::Tools.deleteFile(titlepagelog)
-  Mcmlln::Tools.deleteFile(arch_cover)
+  Mcmlln::Tools.deleteFile(oldtitlepage)
 # Finally: if no titlepage has ever been generated, and no new image has been submitted,
 # and there is no existing image archived from a previous run
-elsif !File.file?(titlepagelog) and !File.file?(final_cover) and !File.file?(arch_cover)
+elsif !File.file?(titlepagelog) and !File.file?(final_cover)
   gen = true
 end
 
