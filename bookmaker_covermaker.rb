@@ -8,17 +8,11 @@ require_relative '../bookmaker/core/header.rb'
 require_relative '../bookmaker/core/metadata.rb'
 require_relative '../utilities/oraclequery.rb'
 
-# Local path var(s)
+# ---------------------- VARIABLES
+local_log_hash, @log_hash = Bkmkr::Paths.setLocalLoghash
+
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
 pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
-
-configfile = File.join(Bkmkr::Paths.project_tmp_dir, "config.json")
-data_hash = Mcmlln::Tools.readjson(configfile)
-
-# the cover filename and metadata
-project_dir = data_hash['project']
-stage_dir = data_hash['stage']
-resource_dir = data_hash['resourcedir']
 
 # Authentication data is required to use docraptor and
 # to post images and other assets to the ftp for inclusion
@@ -37,6 +31,28 @@ if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "
 
 coverdir = Bkmkr::Paths.submitted_images
 archivedir = File.join(Bkmkr::Paths.done_dir, Metadata.pisbn, "cover")
+
+# ---------------------- METHODS
+
+def readConfigJson(logkey='')
+  data_hash = Mcmlln::Tools.readjson(Metadata.configfile)
+  return data_hash
+rescue => logstring
+  return {}
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+
+# ---------------------- PROCESSES
+
+data_hash = readConfigJson('read_config_json')
+
+#local definition(s) based on config.json (cover filename and metadata)
+project_dir = data_hash['project']
+stage_dir = data_hash['stage']
+resource_dir = data_hash['resourcedir']
+
 
 puts "RUNNING COVERMAKER"
 
@@ -167,7 +183,7 @@ end
 
 puts "FINISHED COVERMAKER"
 
-# TESTING
+# ---------------------- TESTING
 
 # title should exist
 test_title_chars = booktitle.scan(/[a-z]/)
@@ -191,9 +207,15 @@ end
 
 # cover jpg should be 600px wide
 
+# ---------------------- LOGGING
+
 # Printing the test results to the log file
 File.open(Bkmkr::Paths.log_file, 'a+') do |f|
   f.puts "----- COVERMAKER PROCESSES"
   f.puts test_title_status
   f.puts test_jpg_status
 end
+
+# Write json log:
+Mcmlln::Tools.logtoJson(@log_hash, 'completed', Time.now)
+Mcmlln::Tools.write_json(local_log_hash, Bkmkr::Paths.json_log)
