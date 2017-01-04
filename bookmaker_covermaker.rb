@@ -261,7 +261,7 @@ puts "RUNNING COVERMAKER"
 # template html file
 # pdf css to be added to the file that will be sent to docraptor
 template_html, cover_css_file = chooseHtmlAndCss(project_dir, stage_dir, 'choose_html_template_and_cover_css')
-@log_hash['html_template'] = template_html
+@log_hash['template_html'] = template_html
 @log_hash['cover_css_file'] = cover_css_file
 
 embedcss = getEmbedCss(cover_css_file, 'get_embed_css')
@@ -325,12 +325,16 @@ puts "FINISHED COVERMAKER"
 test_title_status, test_jpg_status = covermakerTests(booktitle, final_cover, 'covermaker_tests')
 
 # ---------------------- LOGGING
-
-# Printing the test results to the log file
-File.open(Bkmkr::Paths.log_file, 'a+') do |f|
-  f.puts "----- COVERMAKER PROCESSES"
-  f.puts test_title_status
-  f.puts test_jpg_status
+# wrapping this legacy log in a begin block so it doesn't hose travis tests.
+begin
+  # Printing the test results to the log file
+  File.open(Bkmkr::Paths.log_file, 'a+') do |f|
+    f.puts "----- COVERMAKER PROCESSES"
+    f.puts test_title_status
+    f.puts test_jpg_status
+  end
+rescue => e
+  puts '(Ignore for unit-tests:) ERROR encountered in process block: ', e
 end
 
 # Write json log:
