@@ -25,14 +25,23 @@ ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
 
 DocRaptor.api_key "#{docraptor_key}"
 
-# change to DocRaptor 'test' mode when running from staging server
-testing_value = "false"
-if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "true" end
+testing_value_file = File.join(Bkmkr::Paths.resource_dir, "staging.txt")
 
 coverdir = Bkmkr::Paths.submitted_images
 archivedir = File.join(Bkmkr::Paths.done_dir, Metadata.pisbn, "cover")
 
 # ---------------------- METHODS
+
+def testingValue(file, logkey='')
+	# change to DocRaptor 'test' mode when running from staging server
+	testing_value = "false"
+	if File.file?(file) then testing_value = "true" end
+	return testing_value
+rescue => logstring
+	return ''
+ensure
+	Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
 
 def readConfigJson(logkey='')
   data_hash = Mcmlln::Tools.readjson(Metadata.configfile)
@@ -43,94 +52,92 @@ ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
+def chooseHtmlAndCss(project_dir, stage_dir, logkey='')
+  # template html file
+  if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/#{stage_dir}.html")
+    template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/#{stage_dir}.html"
+  elsif File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/template.html")
+    template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/template.html"
+  else
+    template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/generic/template.html"
+  end
 
-# ---------------------- PROCESSES
-
-data_hash = readConfigJson('read_config_json')
-
-#local definition(s) based on config.json (cover filename and metadata)
-project_dir = data_hash['project']
-stage_dir = data_hash['stage']
-resource_dir = data_hash['resourcedir']
-
-
-puts "RUNNING COVERMAKER"
-
-# template html file
-if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/#{stage_dir}.html")
-  template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/#{stage_dir}.html"
-elsif File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/template.html")
-  template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/template.html"
-else
-  template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/generic/template.html"
+  # pdf css to be added to the file that will be sent to docraptor
+  if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/#{stage_dir}.css")
+    cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/#{stage_dir}.css"
+  elsif File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/cover.css")
+    cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/cover.css"
+  else
+    cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/generic/cover.css"
+  end
+  return template_html, cover_css_file
+rescue => logstring
+  return '',''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-# pdf css to be added to the file that will be sent to docraptor
-if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/#{stage_dir}.css")
-  cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/#{stage_dir}.css"
-elsif File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/cover.css")
-  cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/cover.css"
-else
-  cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/generic/cover.css"
+def getEmbedCss(cover_css_file, logkey='')
+  embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
+  return embedcss
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
-
-# pdf js to be added to the file that will be sent to docraptor
-if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/#{project_dir}/#{stage_dir}.js")
-  cover_js_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/#{project_dir}/#{stage_dir}.js"
-elsif File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/#{project_dir}/cover.js")
-  cover_js_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/#{project_dir}/cover.js"
-else
-  cover_js_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/generic/cover.js"
+def chooseJs(project_dir, stage_dir, logkey='')
+  # pdf js to be added to the file that will be sent to docraptor
+  if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/#{project_dir}/#{stage_dir}.js")
+    cover_js_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/#{project_dir}/#{stage_dir}.js"
+  elsif File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/#{project_dir}/cover.js")
+    cover_js_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/#{project_dir}/cover.js"
+  else
+    cover_js_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/scripts/generic/cover.js"
+  end
+  return cover_js_file
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-pdf_js_file = File.join(Bkmkr::Paths.project_tmp_dir, "cover.js")
-
-# Finding author name(s)
-authorname = Metadata.bookauthor
-
-# Finding book title
-booktitle = Metadata.booktitle
-
-# Finding book subtitle
-booksubtitle = Metadata.booksubtitle
-
-if booksubtitle == "Unknown"
-	booksubtitle = " "
-end
-
-pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>")
+def editPdfHtml(template_html, embedcss, booktitle, booksubtitle, authorname, resource_dir, logkey='')
+  pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>")
                                    .gsub(/BKMKRINSERTBKTITLE/,"#{booktitle}")
                                    .gsub(/BKMKRINSERTBKSUBTITLE/,"#{booksubtitle}")
                                    .gsub(/BKMKRINSERTBKAUTHOR/,"#{authorname}")
                                    .gsub(/RESOURCEDIR/,"#{resource_dir}")
                                    .to_s
-
-final_cover = File.join(coverdir, Metadata.frontcover)
-archived_cover = File.join(archivedir, Metadata.frontcover)
-watermark = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "images", "disclaimer.jpg")
-watermarktmp = File.join(archivedir, "disclaimer.jpg")
-
-logdir = File.join(Bkmkr::Paths.done_dir, Metadata.pisbn, "logs")
-coverlog = File.join(logdir, "cover.txt")
-gen = false
-
-# detect whether the cover was autogenerated or not
-if File.file?(coverlog) and !File.file?(final_cover)
-  gen = true
-  Mcmlln::Tools.deleteFile(coverlog)
-  Mcmlln::Tools.deleteFile(archived_cover)
-elsif File.file?(coverlog) and File.file?(final_cover)
-  gen = false
-  Mcmlln::Tools.deleteFile(coverlog)
-  Mcmlln::Tools.deleteFile(archived_cover)
-elsif !File.file?(coverlog) and !File.file?(final_cover) and !File.file?(archived_cover)
-  gen = true
+  return pdf_html
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-if File.file?(final_cover)
-  puts "Found submitted cover; watermarking."
+# detect whether the cover was autogenerated or not
+def detectAutoGeneratedCover(coverlog, final_cover, archived_cover, logkey='')
+  gen = false
+  if File.file?(coverlog) and !File.file?(final_cover)
+    gen = true
+    Mcmlln::Tools.deleteFile(coverlog)
+    Mcmlln::Tools.deleteFile(archived_cover)
+  elsif File.file?(coverlog) and File.file?(final_cover)
+    gen = false
+    Mcmlln::Tools.deleteFile(coverlog)
+    Mcmlln::Tools.deleteFile(archived_cover)
+  elsif !File.file?(coverlog) and !File.file?(final_cover) and !File.file?(archived_cover)
+    gen = true
+  end
+  return gen
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+def watermarkCover(watermark, watermarktmp, final_cover, logkey='')
   FileUtils.cp(watermark, watermarktmp)
   markcover = final_cover
   markcovername = Metadata.frontcover
@@ -142,12 +149,13 @@ if File.file?(final_cover)
   `convert "#{watermarktmp}" -shave #{shave}x0 -quality 100 "#{watermarktmp}"`
   `convert "#{watermarktmp}" "#{final_cover}" -append -border 3x3 "#{final_cover}"`
   FileUtils.rm(watermarktmp)
-elsif File.file?(archived_cover) and gen == false
-  puts "Found existing cover; skipping conversion."
-elsif gen == true
-  puts "Generating cover."
-  # sends file to docraptor for conversion
-  cover_pdf = File.join(coverdir, "cover.pdf")
+rescue => logstring
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+# sends file to docraptor for conversion
+def generateCover(coverdir, cover_pdf, pdf_html, testing_value, logkey='')
   FileUtils.cd(coverdir)
   File.open(cover_pdf, "w+b") do |f|
     f.write DocRaptor.create(:document_content => pdf_html,
@@ -162,50 +170,159 @@ elsif gen == true
   							             }
                          		)
   end
+rescue => logstring
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
 
-  # convert to jpg
+def convertGeneratedCover(cover_pdf, final_cover, logkey='')
   `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
+  # sleep is to prevent intermittent permission errors when deleting the PDF post-conversion
+  sleep 5
+rescue => logstring
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
 
-  sleep 5 #trying to prevent intermittent permission errors when deleting the PDF
+## wrapping a Mcmlln::Tools method in a new method for this script; to return a result for json_logfile
+def rmFile(file, logkey='')
+	Mcmlln::Tools.deleteFile(file)
+rescue => logstring
+ensure
+	Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
 
-  # delete the PDF
-  FileUtils.rm(cover_pdf)
+## wrapping a Mcmlln::Tools method in a new method for this script; to return a result for json_logfile
+def makeFolder(path, logkey='')
+	unless Dir.exist?(path)
+		Mcmlln::Tools.makeDir(path)
+	else
+	 logstring = 'n-a'
+	end
+rescue => logstring
+ensure
+	Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
 
-  unless Dir.exist?(logdir)
-    Mcmlln::Tools.makeDir(logdir)
-  end
-
+def writeCoverLog(coverlog, logkey='')
   File.open(coverlog, 'w+') do |f|
     f.puts Time.now
     f.puts "cover generated from document metadata"
   end
+rescue => logstring
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
+
+def covermakerTests(booktitle, final_cover, logkey='')
+  # title should exist
+  test_title_chars = booktitle.scan(/[a-z]/)
+  test_title_nums = booktitle.scan(/[1-9]/)
+
+  if test_title_chars.length != 0 or test_title_nums.length != 0
+    test_title_status = "pass: title is composed of one or more letters or numbers"
+  else
+    test_title_status = "FAIL: title is composed of one or more letters or numbers"
+  end
+
+  # author name should be text or blank space
+  # subtitle should be text or blank space
+
+  # cover jpg should exist in tmp dir
+  if File.file?(final_cover)
+    test_jpg_status = "pass: The cover jpg was successfully created"
+  else
+    test_jpg_status = "FAIL: The cover jpg was successfully created"
+  end
+
+  # cover jpg should be 600px wide
+  return test_title_status, test_jpg_status
+rescue => logstring
+  return '',''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+# ---------------------- PROCESSES
+
+data_hash = readConfigJson('read_config_json')
+
+#local definition(s) based on config.json (cover filename and metadata)
+project_dir = data_hash['project']
+stage_dir = data_hash['stage']
+resource_dir = data_hash['resourcedir']
+
+# run method: testingValue
+testing_value = testingValue(testing_value_file, 'testing_value_test')
+@log_hash['running_on_testing_server'] = testing_value
+
+puts "RUNNING COVERMAKER"
+
+# template html file
+# pdf css to be added to the file that will be sent to docraptor
+template_html, cover_css_file = chooseHtmlAndCss(project_dir, stage_dir, 'choose_html_template_and_cover_css')
+@log_hash['html_template'] = template_html
+@log_hash['cover_css_file'] = cover_css_file
+
+embedcss = getEmbedCss(cover_css_file, 'get_embed_css')
+
+# pdf js to be added to the file that will be sent to docraptor
+cover_js_file = chooseJs(project_dir, stage_dir, 'choose_cover_js_file')
+@log_hash['cover_js_file'] = cover_js_file
+
+pdf_js_file = File.join(Bkmkr::Paths.project_tmp_dir, "cover.js")
+
+# Finding author name(s)
+authorname = Metadata.bookauthor
+# Finding book title
+booktitle = Metadata.booktitle
+# Finding book subtitle
+booksubtitle = Metadata.booksubtitle
+if booksubtitle == "Unknown"
+	booksubtitle = " "
+end
+
+pdf_html = editPdfHtml(template_html, embedcss, booktitle, booksubtitle, authorname, resource_dir, 'edit_pdf_html')
+
+final_cover = File.join(coverdir, Metadata.frontcover)
+archived_cover = File.join(archivedir, Metadata.frontcover)
+watermark = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "images", "disclaimer.jpg")
+watermarktmp = File.join(archivedir, "disclaimer.jpg")
+
+logdir = File.join(Bkmkr::Paths.done_dir, Metadata.pisbn, "logs")
+coverlog = File.join(logdir, "cover.txt")
+
+# detect whether the cover was autogenerated or not
+gen = detectAutoGeneratedCover(coverlog, final_cover, archived_cover, 'detect_auto-generated_cover')
+@log_hash['gen(erate_cover)_value'] = gen
+
+
+# generate cover, watermark existing cover, or skip
+if File.file?(final_cover)
+  @log_hash['cover_status'] = "Found submitted cover; watermarking."
+  watermarkCover(watermark, watermarktmp, final_cover, 'watermark_final_cover')
+elsif File.file?(archived_cover) and gen == false
+  @log_hash['cover_status'] = "Found existing cover; skipping conversion."
+elsif gen == true
+  @log_hash['cover_status'] = "Generating cover."
+  cover_pdf = File.join(coverdir, "cover.pdf")
+  # sends file to docraptor for conversion
+  generateCover(coverdir, cover_pdf, pdf_html, testing_value, 'generate_cover_via_docraptor')
+  # convert to jpg
+  convertGeneratedCover(cover_pdf, final_cover, 'convert_generated_cover_to_jpg')
+  # delete the PDF
+  rmFile(cover_pdf, 'rm_cover_pdf')
+
+  makeFolder(logdir, 'create_logdir_as_needed')
+
+  writeCoverLog(coverlog, 'write_cover_logfile')
+end
+puts @log_hash['cover_status']
 
 puts "FINISHED COVERMAKER"
 
-# ---------------------- TESTING
-
-# title should exist
-test_title_chars = booktitle.scan(/[a-z]/)
-test_title_nums = booktitle.scan(/[1-9]/)
-
-if test_title_chars.length != 0 or test_title_nums.length != 0
-  test_title_status = "pass: title is composed of one or more letters or numbers"
-else
-  test_title_status = "FAIL: title is composed of one or more letters or numbers"
-end
-
-# author name should be text or blank space
-# subtitle should be text or blank space
-
-# cover jpg should exist in tmp dir
-if File.file?(final_cover)
-  test_jpg_status = "pass: The cover jpg was successfully created"
-else
-  test_jpg_status = "FAIL: The cover jpg was successfully created"
-end
-
-# cover jpg should be 600px wide
+# covermaker tests
+test_title_status, test_jpg_status = covermakerTests(booktitle, final_cover, 'covermaker_tests')
 
 # ---------------------- LOGGING
 
