@@ -198,18 +198,18 @@ ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-def chooseCss(project_dir, pdf_css_dir, logkey='')
-  if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/titlepage.css")
-    cover_css_file = File.join(pdf_css_dir, project_dir, "titlepage.css")
-  else
-    cover_css_file = File.join(pdf_css_dir, "generic", "titlepage.css")
-  end
-  return cover_css_file
-rescue => logstring
-  return ''
-ensure
-  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
-end
+# def chooseCss(project_dir, pdf_css_dir, logkey='')
+#   if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/titlepage.css")
+#     cover_css_file = File.join(pdf_css_dir, project_dir, "titlepage.css")
+#   else
+#     cover_css_file = File.join(pdf_css_dir, "generic", "titlepage.css")
+#   end
+#   return cover_css_file
+# rescue => logstring
+#   return ''
+# ensure
+#   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+# end
 
 def getEmbedCss(cover_css_file, logkey='')
   embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
@@ -303,9 +303,9 @@ end
 data_hash = readConfigJson('read_config_json')
 
 #local definition(s) based on config.json (cover filename and metadata)
-project_dir = data_hash['project']
-stage_dir = data_hash['stage']
-resource_dir = data_hash['resourcedir']
+# project_dir = data_hash['project']
+# stage_dir = data_hash['stage']
+# resource_dir = data_hash['resourcedir']
 
 # run method: testingValue
 testing_value = testingValue(testing_value_file, 'testing_value_test')
@@ -381,8 +381,11 @@ if final_cover.empty? or final_cover.nil?
 end
 
 # CSS that will format the final titlepage PDF
-cover_css_file = chooseCss(project_dir, pdf_css_dir, 'choose_cover_css_file')
-@log_hash['cover_css_file'] = cover_css_file
+#this method was checking the css path based project_dir from metadata, which at this stage _
+#in our deploy.bad only holds 'N/A'.  So commenting out the chooseCSS method and it's call here:
+# cover_css_file = chooseCss(project_dir, pdf_css_dir, 'choose_cover_css_file')
+# @log_hash['cover_css_file'] = cover_css_file
+cover_css_file = File.join(pdf_css_dir, "generic", "titlepage.css")
 
 embedcss = getEmbedCss(cover_css_file, 'get_embed_css')
 
