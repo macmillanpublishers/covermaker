@@ -31,14 +31,14 @@ ensure
 	Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-def readConfigJson(logkey='')
-  data_hash = Mcmlln::Tools.readjson(Metadata.configfile)
-  return data_hash
-rescue => logstring
-  return {}
-ensure
-  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
-end
+# def readConfigJson(logkey='')
+#   data_hash = Mcmlln::Tools.readjson(Metadata.configfile)
+#   return data_hash
+# rescue => logstring
+#   return {}
+# ensure
+#   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+# end
 
 # wrapping a method from isbnFinder.rb so we can get output for json_logfile
 def getIsbns(logkey='')
@@ -300,7 +300,7 @@ end
 
 # ---------------------- PROCESSES
 
-data_hash = readConfigJson('read_config_json')
+# data_hash = readConfigJson('read_config_json')
 
 #local definition(s) based on config.json (cover filename and metadata)
 # project_dir = data_hash['project']
