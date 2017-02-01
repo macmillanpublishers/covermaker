@@ -33,14 +33,14 @@ archivedir = File.join(Bkmkr::Paths.done_dir, Metadata.pisbn, "cover")
 # ---------------------- METHODS
 
 def testingValue(file, logkey='')
-	# change to DocRaptor 'test' mode when running from staging server
-	testing_value = "false"
-	if File.file?(file) then testing_value = "true" end
-	return testing_value
+  # change to DocRaptor 'test' mode when running from staging server
+  testing_value = "false"
+  if File.file?(file) then testing_value = "true" end
+  return testing_value
 rescue => logstring
-	return ''
+  return ''
 ensure
-	Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
 def readConfigJson(logkey='')

@@ -21,24 +21,15 @@ testing_value_file = File.join(Bkmkr::Paths.resource_dir, "staging.txt")
 # ---------------------- METHODS
 
 def testingValue(file, logkey='')
-	# change to DocRaptor 'test' mode when running from staging server
-	testing_value = "false"
-	if File.file?(file) then testing_value = "true" end
-	return testing_value
+  # change to DocRaptor 'test' mode when running from staging server
+  testing_value = "false"
+  if File.file?(file) then testing_value = "true" end
+  return testing_value
 rescue => logstring
-	return ''
+  return ''
 ensure
-	Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
-
-# def readConfigJson(logkey='')
-#   data_hash = Mcmlln::Tools.readjson(Metadata.configfile)
-#   return data_hash
-# rescue => logstring
-#   return {}
-# ensure
-#   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
-# end
 
 # wrapping a method from isbnFinder.rb so we can get output for json_logfile
 def getIsbns(logkey='')
@@ -108,14 +99,14 @@ end
 
 ## wrapping a Mcmlln::Tools method in a new method for this script; to return a result for json_logfile
 def makeFolder(path, logkey='')
-	unless Dir.exist?(path)
-		Mcmlln::Tools.makeDir(path)
-	else
-	 logstring = 'n-a'
-	end
+  unless Dir.exist?(path)
+    Mcmlln::Tools.makeDir(path)
+  else
+    logstring = 'n-a'
+  end
 rescue => logstring
 ensure
-	Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
 def checkForOldTitlepages(coverdir, logkey='')
@@ -299,13 +290,6 @@ ensure
 end
 
 # ---------------------- PROCESSES
-
-# data_hash = readConfigJson('read_config_json')
-
-#local definition(s) based on config.json (cover filename and metadata)
-# project_dir = data_hash['project']
-# stage_dir = data_hash['stage']
-# resource_dir = data_hash['resourcedir']
 
 # run method: testingValue
 testing_value = testingValue(testing_value_file, 'testing_value_test')
