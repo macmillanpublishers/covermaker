@@ -6,78 +6,75 @@ require_relative '../bookmaker/core/header.rb'
 require_relative '../utilities/oraclequery.rb'
 require_relative '../utilities/isbn_finder.rb'
 
+# ---------------------- VARIABLES
+
+local_log_hash, @log_hash = Bkmkr::Paths.setLocalLoghash
+
+# paths to key scripts and JSON metadata
+pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
+pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
+imprint_json = File.join(Bkmkr::Paths.scripts_dir, "bookmaker_addons", "imprints.json")
+
+testing_value_file = File.join(Bkmkr::Paths.resource_dir, "staging.txt")
+
 # ---------------------- METHODS
 
-# find any tagged isbn in an html file
-def findAnyISBN(file)
-  isbn_basestring = File.read(file).match(/spanISBNisbn">\s*978(\D?\d?){10}<\/span>/)
-  unless isbn_basestring.nil?
-    isbn_basestring = isbn_basestring.to_s.gsub(/\D/,"")
-    isbn = isbn_basestring.match(/978(\d{10})/).to_s
-  else
-    isbn = ""
-  end
-  return isbn
+def testingValue(file, logkey='')
+  # change to DocRaptor 'test' mode when running from staging server
+  testing_value = "false"
+  if File.file?(file) then testing_value = "true" end
+  return testing_value
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-# find a tagged isbn in an html file that matches a provided book type
-def findSpecificISBN(file, string, type)
-  allisbns = File.read(file).scan(/(<span class="spanISBNisbn">\s*97[89]((\D?\d){10})<\/span>\s*\(?.*?\)?\s*<\/p>)/)
-  pisbn = []
-  allisbns.each do |k|
-    testisbn = ""
-    testisbn = k.to_s.match(/#{string}/)
-    case type
-    when "include"
-      unless testisbn.nil?
-        pisbn.push(k)
-      end
-    when "exclude"
-      if testisbn.nil?
-        pisbn.push(k)
-      end
-    end
-  end
-  isbn_basestring = pisbn.shift
-  unless isbn_basestring.nil?
-    isbn_basestring = isbn_basestring.to_s.gsub(/\D/,"")
-    isbn = isbn_basestring.match(/978(\d{10})/).to_s
-  else
-    isbn = ""
-  end
-  return isbn
+# wrapping a method from isbnFinder.rb so we can get output for json_logfile
+def getIsbns(logkey='')
+  pisbn, eisbn, allworks = findBookISBNs(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename)
+  return pisbn, eisbn, allworks
+rescue => logstring
+  return '','',''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-def findImprint(pisbn, eisbn)
+def findImprint(pisbn, eisbn, logkey='')
   if pisbn.length == 13
     thissql = exactSearchSingleKey(pisbn, "EDITION_EAN")
     isbnhash = runQuery(thissql)
     unless isbnhash.nil? or isbnhash.empty? or !isbnhash
       imprint = isbnhash["book"]["IMPRINT_DESC"]
-      puts "Found imprint in DW: #{imprint}"
+      logstring = "Found imprint in DW: #{imprint}"
     else
       imprint = "Macmillan"
-      puts "Unable to connect to DW; using default imprint: #{imprint}"
+      logstring =  "Unable to connect to DW; using default imprint: #{imprint}"
     end
   elsif eisbn.length == 13
     thissql = exactSearchSingleKey(eisbn, "EDITION_EAN")
     isbnhash = runQuery(thissql)
     unless isbnhash.nil? or isbnhash.empty? or !isbnhash
       imprint = isbnhash["book"]["IMPRINT_DESC"]
-      puts "Found imprint in DW: #{imprint}"
+      logstring =  "Found imprint in DW: #{imprint}"
     else
       imprint = "Macmillan"
-      puts "Unable to connect to DW; using default imprint: #{imprint}"
+      logstring =  "Unable to connect to DW; using default imprint: #{imprint}"
     end
   else
     imprint = "Macmillan"
-    puts "No imprint found in DW; using default imprint: #{imprint}"
+    logstring =  "No imprint found in DW; using default imprint: #{imprint}"
   end
+  puts logstring
   return imprint
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
 # determine directory name for assets e.g. css, js, logo images
-def getResourceDir(imprint, json)
+def getResourceDir(imprint, json, logkey='')
   data_hash = Mcmlln::Tools.readjson(json)
   arr = []
   # loop through each json record to see if imprint name matches formalname
@@ -93,41 +90,209 @@ def getResourceDir(imprint, json)
     path = arr.pop
   end
   return path
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+## wrapping a Mcmlln::Tools method in a new method for this script; to return a result for json_logfile
+def makeFolder(path, logkey='')
+  unless Dir.exist?(path)
+    Mcmlln::Tools.makeDir(path)
+  else
+    logstring = 'n-a'
+  end
+rescue => logstring
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+def checkForOldTitlepages(coverdir, logkey='')
+  oldtitlepage = ""
+  oldepubtitlepage = File.join(coverdir, "epubtitlepage.jpg")
+  oldpodtitlepage = File.join(coverdir, "titlepage.jpg")
+
+  if File.file?(oldepubtitlepage)
+    logstring = "Found an archived EPUB titlepage"
+    oldtitlepage = oldepubtitlepage
+  elsif File.file?(oldpodtitlepage)
+    logstring = "Found an archived POD titlepage"
+    oldtitlepage = oldpodtitlepage
+  end
+  puts logstring
+  return oldtitlepage
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+def checkForSubmittedTitlepages(submitted_images, logkey='')
+  allimg = File.join(submitted_images, "*")
+  etparr = Dir[allimg].select { |f| f.include?('epubtitlepage.')}
+  ptparr = Dir[allimg].select { |f| f.include?('titlepage.')}
+
+  newtitlepage = ""
+
+  if etparr.any?
+    logstring = "Found a new EPUB titlepage"
+    newtitlepage = etparr.find { |e| /[\/|\\]epubtitlepage\./ =~ e }
+  elsif ptparr.any?
+    logstring = "Found a new POD titlepage"
+    newtitlepage = ptparr.find { |e| /[\/|\\]titlepage\./ =~ e }
+  end
+  puts logstring
+  return newtitlepage
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+def setFinalTitlepage(oldtitlepage, newtitlepage, logkey='')
+  final_cover = oldtitlepage
+  if File.file?(newtitlepage)
+    final_cover = newtitlepage
+  end
+  return final_cover
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+# Determine whether or not to generate a titlepage.
+def detectAutoGeneratedTitlepage(titlepagelog, newtitlepage, oldtitlepage, final_cover, logkey='')
+  # set the default switch for generating titlepage to false
+  gen = false
+  # First check: if an epub titlepage has previously been generated, and no new image has been submitted by the user
+  if File.file?(titlepagelog) and !File.file?(newtitlepage)
+    gen = true
+    Mcmlln::Tools.deleteFile(titlepagelog)
+    Mcmlln::Tools.deleteFile(oldtitlepage)
+  # Then check: if a titlepage has previously been generated, but there IS a new image submitted by the user
+  elsif File.file?(titlepagelog) and File.file?(newtitlepage)
+    gen = false
+    Mcmlln::Tools.deleteFile(titlepagelog)
+    Mcmlln::Tools.deleteFile(oldtitlepage)
+  # Finally: if no titlepage has ever been generated, and no new image has been submitted,
+  # and there is no existing image archived from a previous run
+  elsif !File.file?(titlepagelog) and !File.file?(final_cover)
+    gen = true
+  end
+  return gen
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+def getEmbedCss(cover_css_file, logkey='')
+  embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
+  return embedcss
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+## wrapping Bkmkr::Tools.runnode in a new method for this script; to return a result for json_logfile
+def localRunNode(jsfile, args, logkey='')
+	Bkmkr::Tools.runnode(jsfile, args)
+rescue => logstring
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+def editPdfHtml(template_html, embedcss, resource_dir, logkey='')
+  pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>")
+                                     .gsub(/RESOURCEDIR/,"#{resource_dir}").to_s
+  return pdf_html
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+def generateTitlepage(coverdir, cover_pdf, pdf_html, testing_value, logkey='')
+  FileUtils.cd(coverdir)
+  File.open(cover_pdf, "w+b") do |f|
+    f.write DocRaptor.create(:document_content => pdf_html,
+                             :name             => "titlepage.pdf",
+                             :document_type    => "pdf",
+                             :strict			     => "none",
+                             :test             => "#{testing_value}",
+  	                         :prince_options	 => {
+  	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
+  	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
+                                 :javascript       => "true"
+  							             }
+                         		)
+  end
+rescue => logstring
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+def convertGeneratedTitlepage(cover_pdf, final_cover, logkey='')
+  `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
+  # sleep is to prevent intermittent permission errors when deleting the PDF post-conversion
+  sleep 5
+rescue => logstring
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+def writeTitlepageLog(titlepagelog, logkey='')
+  File.open(titlepagelog, 'w+') do |f|
+    f.puts Time.now
+    f.puts "titlepage generated from document section.titlepage"
+  end
+rescue => logstring
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+## wrapping a Mcmlln::Tools method in a new method for this script; to return a result for json_logfile
+def rmFile(file, logkey='')
+	Mcmlln::Tools.deleteFile(file)
+rescue => logstring
+ensure
+	Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+def titlepageTests(final_cover, logkey='')
+  if File.file?(final_cover)
+    test_jpg_status = "pass: I found a titlepage image"
+  else
+    test_jpg_status = "FAIL: no titlepage image was created"
+  end
+  return test_jpg_status
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
 # ---------------------- PROCESSES
 
+# run method: testingValue
+testing_value = testingValue(testing_value_file, 'testing_value_test')
+@log_hash['running_on_testing_server'] = testing_value
+
 puts "RUNNING TITLEPAGEMAKER"
 
-# paths to key scripts and JSON metadata
-pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
-pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
-imprint_json = File.join(Bkmkr::Paths.scripts_dir, "bookmaker_addons", "imprints.json")
-
-configfile = File.join(Bkmkr::Paths.project_tmp_dir, "config.json")
-data_hash = Mcmlln::Tools.readjson(configfile)
-
-# the cover filename and metadata
-project_dir = data_hash['project']
-stage_dir = data_hash['stage']
-resource_dir = data_hash['resourcedir']
-
-# --------------- ISBN FINDER COPIED FROM BOOKMAKER_ADDONS/METADATA_PREPROCESSING
-# testing to see if ISBN style exists
-spanisbn = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn/)
-multiple_isbns = File.read(Bkmkr::Paths.outputtmp_html).scan(/spanISBNisbn">\s*.+<\/span>\s*\(((hardcover)|(trade\s*paperback)|(mass.market.paperback)|(print.on.demand)|(e\s*-*\s*book))\)/)
-
 # determine ISBNs
-pisbn, eisbn, allworks = findBookISBNs(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename)
+pisbn, eisbn, allworks = getIsbns('get_isbns')
 
 # get imprint for logo placement
-imprint = findImprint(pisbn, eisbn)
+imprint = findImprint(pisbn, eisbn, 'find_imprint')
 
 # getting resource_dir based on imprint, for logo
-resource_dir = getResourceDir(imprint, imprint_json)
+resource_dir = getResourceDir(imprint, imprint_json, 'get_resource_dir')
+@log_hash['resource_dir'] = resource_dir
 puts "Resource dir: #{resource_dir}"
-
-# --------------- FINISH ISBN FINDER
 
 # Authentication data is required to use docraptor and
 # to post images and other assets to the ftp for inclusion
@@ -153,81 +318,32 @@ arch_podtp = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
 arch_epubtp = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "epubtitlepage.jpg")
 
 # create the final archive dirs if they don't exist yet
-unless Dir.exist?(final_dir)
-  Mcmlln::Tools.makeDir(final_dir)
-  Mcmlln::Tools.makeDir(final_dir_images)
-end
+makeFolder(final_dir, 'create_final_dir')
+makeFolder(final_dir_images, 'create_final_dir_images')
 
 # create the logging dir if it doesn't exist yet
-unless Dir.exist?(logdir)
-  Mcmlln::Tools.makeDir(logdir)
-end
+makeFolder(logdir, 'create_logdir')
 
 # find any archived titlepage images
-
-oldtitlepage = ""
-
-oldepubtitlepage = File.join(coverdir, "epubtitlepage.jpg")
-oldpodtitlepage = File.join(coverdir, "titlepage.jpg")
-
-if File.file?(oldepubtitlepage)
-  puts "Found an archived EPUB titlepage"
-  oldtitlepage = oldepubtitlepage
-elsif File.file?(oldpodtitlepage)
-  puts "Found an archived POD titlepage"
-  oldtitlepage = oldpodtitlepage
-end
+oldtitlepage = checkForOldTitlepages(coverdir, 'check_for_old_titlepages')
 
 # find any new user-submitted titlepage images
-allimg = File.join(submitted_images, "*")
-etparr = Dir[allimg].select { |f| f.include?('epubtitlepage.')}
-ptparr = Dir[allimg].select { |f| f.include?('titlepage.')}
-
-newtitlepage = ""
-
-if etparr.any?
-  puts "Found a new EPUB titlepage"
-  newtitlepage = etparr.find { |e| /[\/|\\]epubtitlepage\./ =~ e }
-elsif ptparr.any?
-  puts "Found a new POD titlepage"
-  newtitlepage = ptparr.find { |e| /[\/|\\]titlepage\./ =~ e }
-end
+newtitlepage = checkForSubmittedTitlepages(submitted_images, 'check_for_submitted_titlepages')
 
 # if an epub-specific titlepage file has been submitted, use that;
 # otherwise use the new POD coverpage if it exists;
 # and if neither exists, we'll create the epubtitlepage, and set it to the final archival path.
 # (POD titlepage images should only be submitted manually by the user, never created programatically.)
 
-final_cover = oldtitlepage
-
-if File.file?(newtitlepage)
-  final_cover = newtitlepage
-end
-
-# set the default switch to generate the titlepage
-gen = false
+final_cover = setFinalTitlepage(oldtitlepage, newtitlepage, 'set_final_cover_var')
 
 # Determine whether or not to generate a titlepage.
-# First check: if an epub titlepage has previously been generated, and no new image has been submitted by the user
-if File.file?(titlepagelog) and !File.file?(newtitlepage)
-  gen = true
-  Mcmlln::Tools.deleteFile(titlepagelog)
-  Mcmlln::Tools.deleteFile(oldtitlepage)
-# Then check: if a titlepage has previously been generated, but there IS a new image submitted by the user
-elsif File.file?(titlepagelog) and File.file?(newtitlepage)
-  gen = false
-  Mcmlln::Tools.deleteFile(titlepagelog)
-  Mcmlln::Tools.deleteFile(oldtitlepage)
-# Finally: if no titlepage has ever been generated, and no new image has been submitted,
-# and there is no existing image archived from a previous run
-elsif !File.file?(titlepagelog) and !File.file?(final_cover)
-  gen = true
-end
-
+gen = detectAutoGeneratedTitlepage(titlepagelog, newtitlepage, oldtitlepage, final_cover, 'determine_titlepage_generation')
+@log_hash['gen_value_(generate_titlepage_bool)'] = gen
 puts "Titlepage generation: #{gen}"
 
 # now that we've got the logic out of the way,
-# set a default value for the final titlepage, 
+# set a default value for the final titlepage,
 # if no images were found above
 
 if final_cover.empty? or final_cover.nil?
@@ -235,70 +351,55 @@ if final_cover.empty? or final_cover.nil?
 end
 
 # CSS that will format the final titlepage PDF
-if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/titlepage.css")
-  cover_css_file = File.join(pdf_css_dir, project_dir, "titlepage.css")
-else
-  cover_css_file = File.join(pdf_css_dir, "generic", "titlepage.css")
-end
+cover_css_file = File.join(pdf_css_dir, "generic", "titlepage.css")
 
-embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
+embedcss = getEmbedCss(cover_css_file, 'get_embed_css')
 
 # prepare the HTML from which to generate the titlepage PDF
-Bkmkr::Tools.runnode(gettitlepagejs, "#{Bkmkr::Paths.outputtmp_html} #{template_html}")
+localRunNode(gettitlepagejs, "#{Bkmkr::Paths.outputtmp_html} #{template_html}", 'get_titlepage_js')
 
-pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>")
-                                   .gsub(/RESOURCEDIR/,"#{resource_dir}").to_s
+pdf_html = editPdfHtml(template_html, embedcss, resource_dir, 'edit_pdf_html')
 
 # Docraptor setup
 DocRaptor.api_key "#{Bkmkr::Keys.docraptor_key}"
 
-# change to DocRaptor 'test' mode when running from staging server
-testing_value = "false"
-if File.file?("#{Bkmkr::Paths.resource_dir}/staging.txt") then testing_value = "true" end
-
 # Create the titlepage PDF
 unless gen == false
-  puts "Generating titlepage."
-  FileUtils.cd(coverdir)
-  File.open(cover_pdf, "w+b") do |f|
-    f.write DocRaptor.create(:document_content => pdf_html,
-                             :name             => "titlepage.pdf",
-                             :document_type    => "pdf",
-                             :strict			     => "none",
-                             :test             => "#{testing_value}",
-  	                         :prince_options	 => {
-  	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
-  	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
-                                 :javascript       => "true"
-  							             }
-                         		)
-  end
+  @log_hash['titlepage_status'] =  "Generating titlepage."
+  generateTitlepage(coverdir, cover_pdf, pdf_html, testing_value, 'generate_titlepage')
+
   # convert the PDF to jpg
-  `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
+  convertGeneratedTitlepage(cover_pdf, final_cover, 'convert_generated_titlepage_to_jpg')
 
   # write the titlepage gen log, from which we determine whether titlepages have been created in the past
-  File.open(titlepagelog, 'w+') do |f|
-    f.puts Time.now
-    f.puts "titlepage generated from document section.titlepage"
-  end
-
-  sleep 5 #trying to prevent intermittent permission errors when deleting the PDF
+  writeTitlepageLog(titlepagelog, 'write_titlepage_logfile')
 
   # delete the now-useless PDF file
-  FileUtils.rm(cover_pdf)
+  rmFile(cover_pdf, 'rm_cover_pdf')
+else
+  @log_hash['titlepage_status'] = "Not generating a titlepage."
 end
+puts @log_hash['titlepage_status']
 
 puts "FINISHED TITLEPAGEMAKER"
 
-# TESTING
-if File.file?(final_cover)
-  test_jpg_status = "pass: I found a titlepage image"
-else
-  test_jpg_status = "FAIL: no titlepage image was created"
+# titlepage-maker test
+test_jpg_status = titlepageTests(final_cover, 'titlepage_test')
+
+
+# ---------------------- LOGGING
+
+# wrapping this legacy log in a begin block so it doesn't hose travis tests.
+begin
+  # Printing the test results to the log file
+  File.open(Bkmkr::Paths.log_file, 'a+') do |f|
+    f.puts "----- TITLEPAGE PROCESSES"
+    f.puts test_jpg_status
+  end
+rescue => e
+  puts '(Ignore for unit-tests:) ERROR encountered in process block: ', e
 end
 
-# Printing the test results to the log file
-File.open(Bkmkr::Paths.log_file, 'a+') do |f|
-  f.puts "----- TITLEPAGE PROCESSES"
-  f.puts test_jpg_status
-end
+# Write json log:
+Mcmlln::Tools.logtoJson(@log_hash, 'completed', Time.now)
+Mcmlln::Tools.write_json(local_log_hash, Bkmkr::Paths.json_log)
