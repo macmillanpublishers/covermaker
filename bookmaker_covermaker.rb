@@ -52,7 +52,7 @@ ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-def chooseHtmlAndCss(project_dir, stage_dir, logkey='')
+def chooseHTML(project_dir, stage_dir, logkey='')
   # template html file
   if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/#{stage_dir}.html")
     template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/#{project_dir}/#{stage_dir}.html"
@@ -61,7 +61,14 @@ def chooseHtmlAndCss(project_dir, stage_dir, logkey='')
   else
     template_html = "#{Bkmkr::Paths.scripts_dir}/covermaker/html/generic/template.html"
   end
+  return template_html
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
 
+def chooseCSS(project_dir, stage_dir, logkey='')
   # pdf css to be added to the file that will be sent to docraptor
   if File.file?("#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/#{stage_dir}.css")
     cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/#{project_dir}/#{stage_dir}.css"
@@ -70,14 +77,14 @@ def chooseHtmlAndCss(project_dir, stage_dir, logkey='')
   else
     cover_css_file = "#{Bkmkr::Paths.scripts_dir}/covermaker/css/generic/cover.css"
   end
-  return template_html, cover_css_file
+  return cover_css_file
 rescue => logstring
-  return '',''
+  return ''
 ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-def getEmbedCss(cover_css_file, logkey='')
+def getEmbedCSS(cover_css_file, logkey='')
   embedcss = File.read(cover_css_file).gsub(/(\\)/,"\\0\\0").to_s
   return embedcss
 rescue => logstring
@@ -259,12 +266,14 @@ testing_value = testingValue(testing_value_file, 'testing_value_test')
 puts "RUNNING COVERMAKER"
 
 # template html file
-# pdf css to be added to the file that will be sent to docraptor
-template_html, cover_css_file = chooseHtmlAndCss(project_dir, stage_dir, 'choose_html_template_and_cover_css')
+template_html = chooseHTML(project_dir, stage_dir, 'choose_html')
 @log_hash['template_html'] = template_html
+
+# pdf css to be added to the file that will be sent to docraptor
+cover_css_file = chooseCSS(project_dir, stage_dir, 'choose_cover_css')
 @log_hash['cover_css_file'] = cover_css_file
 
-embedcss = getEmbedCss(cover_css_file, 'get_embed_css')
+embedcss = getEmbedCSS(cover_css_file, 'get_embed_css')
 
 # pdf js to be added to the file that will be sent to docraptor
 cover_js_file = chooseJs(project_dir, stage_dir, 'choose_cover_js_file')
