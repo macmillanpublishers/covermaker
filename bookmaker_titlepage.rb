@@ -262,15 +262,13 @@ ensure
 	Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-def titlepageTests(final_cover, logkey='')
+def titlepageTest(final_cover, logkey='')
   if File.file?(final_cover)
-    test_jpg_status = "pass: I found a titlepage image"
+    logstring = "pass: I found a titlepage image"
   else
-    test_jpg_status = "FAIL: no titlepage image was created"
+    logstring = "FAIL: no titlepage image was created"
   end
-  return test_jpg_status
 rescue => logstring
-  return ''
 ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
@@ -384,21 +382,10 @@ puts @log_hash['titlepage_status']
 puts "FINISHED TITLEPAGEMAKER"
 
 # titlepage-maker test
-test_jpg_status = titlepageTests(final_cover, 'titlepage_test')
+titlepageTest(final_cover, 'titlepage_test')
 
 
 # ---------------------- LOGGING
-
-# wrapping this legacy log in a begin block so it doesn't hose travis tests.
-begin
-  # Printing the test results to the log file
-  File.open(Bkmkr::Paths.log_file, 'a+') do |f|
-    f.puts "----- TITLEPAGE PROCESSES"
-    f.puts test_jpg_status
-  end
-rescue => e
-  puts '(Ignore for unit-tests:) ERROR encountered in process block: ', e
-end
 
 # Write json log:
 Mcmlln::Tools.logtoJson(@log_hash, 'completed', Time.now)
