@@ -332,19 +332,10 @@ puts "FINISHED COVERMAKER"
 
 # covermaker tests
 test_title_status, test_jpg_status = covermakerTests(booktitle, final_cover, 'covermaker_tests')
+@log_hash['test_title_status'] = test_title_status
+@log_hash['test_jpg_status'] = test_jpg_status
 
 # ---------------------- LOGGING
-# wrapping this legacy log in a begin block so it doesn't hose travis tests.
-begin
-  # Printing the test results to the log file
-  File.open(Bkmkr::Paths.log_file, 'a+') do |f|
-    f.puts "----- COVERMAKER PROCESSES"
-    f.puts test_title_status
-    f.puts test_jpg_status
-  end
-rescue => e
-  puts '(Ignore for unit-tests:) ERROR encountered in process block: ', e
-end
 
 # Write json log:
 Mcmlln::Tools.logtoJson(@log_hash, 'completed', Time.now)
