@@ -42,6 +42,9 @@ end
 
 def getMetaElement(file, name, logkey='')
   metaelement = File.read(file).match(/(<meta name="#{name}" content=")(.*?)("\/>)/i)
+  unless metaelement.nil?
+    metaelement = HTMLEntities.new.decode(metaelement[2])
+  end
   return metaelement
 rescue => logstring
   return ''
@@ -74,7 +77,7 @@ def findImprint(file, pisbn, eisbn, logkey='')
     imprint = "Macmillan"
     logstring =  "No imprint found in DW; using default imprint: #{imprint}"
   end
-  
+
   metaimprint = getMetaElement(file, "imprint", 'custom_imprint_metaelement')
   unless metaimprint.nil?
     imprint = metaimprint
