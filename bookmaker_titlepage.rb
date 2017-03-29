@@ -396,7 +396,6 @@ unless gen == false
 else
   @log_hash['titlepage_status'] = "Not generating a titlepage."
 end
-puts @log_hash['titlepage_status']
 
 # titlepage-maker test
 titlepageTest(final_cover, 'titlepage_test')
