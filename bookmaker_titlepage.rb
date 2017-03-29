@@ -74,13 +74,13 @@ def findImprint(file, pisbn, eisbn, logkey='')
     imprint = "Macmillan"
     logstring =  "No imprint found in DW; using default imprint: #{imprint}"
   end
-  puts logstring
-
+  
   metaimprint = getMetaElement(file, "imprint", 'custom_imprint_metaelement')
   unless metaimprint.nil?
     imprint = metaimprint
+    logstring = metaimprint
   end
-  
+
   return imprint
 rescue => logstring
   return ''
