@@ -41,6 +41,7 @@ ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
+# Find any custom metadata overrides that users added to the file
 def getMetaElement(file, name, logkey='')
   metaelement = File.read(file).match(/(<meta name="#{name}" content=")(.*?)("\/>)/i)
   unless metaelement.nil?
@@ -54,6 +55,8 @@ ensure
 end
 
 def findImprint(file, pisbn, eisbn, logkey='')
+  logstring = "none"
+
   if pisbn.length == 13
     thissql = exactSearchSingleKey(pisbn, "EDITION_EAN")
     isbnhash = runQuery(thissql)
@@ -79,6 +82,7 @@ def findImprint(file, pisbn, eisbn, logkey='')
     logstring =  "No imprint found in DW; using default imprint: #{imprint}"
   end
 
+  # if there is custom imprint metadata, use that instead of whatever is in the DW
   metaimprint = getMetaElement(file, "imprint", 'custom_imprint_metaelement')
   unless metaimprint.nil?
     imprint = metaimprint
@@ -87,7 +91,6 @@ def findImprint(file, pisbn, eisbn, logkey='')
 
   return imprint
 rescue => logstring
-  return ''
 ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
