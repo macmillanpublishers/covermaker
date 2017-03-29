@@ -31,8 +31,8 @@ ensure
 end
 
 # wrapping a method from isbnFinder.rb so we can get output for json_logfile
-def getIsbns(logkey='')
-  pisbn, eisbn, allworks = findBookISBNs(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename)
+def getIsbns(file, filename, logkey='')
+  pisbn, eisbn, allworks = findBookISBNs(file, filename)
   return pisbn, eisbn, allworks
 rescue => logstring
   return '','',''
@@ -40,7 +40,16 @@ ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-def findImprint(pisbn, eisbn, logkey='')
+def getMetaElement(file, name, logkey='')
+  metaelement = File.read(file).match(/(<meta name="#{name}" content=")(.*?)("\/>)/i)
+  return metaelement
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+def findImprint(file, pisbn, eisbn, logkey='')
   if pisbn.length == 13
     thissql = exactSearchSingleKey(pisbn, "EDITION_EAN")
     isbnhash = runQuery(thissql)
@@ -66,6 +75,12 @@ def findImprint(pisbn, eisbn, logkey='')
     logstring =  "No imprint found in DW; using default imprint: #{imprint}"
   end
   puts logstring
+
+  metaimprint = getMetaElement(file, "imprint", 'custom_imprint_metaelement')
+  unless metaimprint.nil?
+    imprint = metaimprint
+  end
+  
   return imprint
 rescue => logstring
   return ''
@@ -282,10 +297,10 @@ testing_value = testingValue(testing_value_file, 'testing_value_test')
 puts "RUNNING TITLEPAGEMAKER"
 
 # determine ISBNs
-pisbn, eisbn, allworks = getIsbns('get_isbns')
+pisbn, eisbn, allworks = getIsbns(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename, 'get_isbns')
 
 # get imprint for logo placement
-imprint = findImprint(pisbn, eisbn, 'find_imprint')
+imprint = findImprint(Bkmkr::Paths.outputtmp_html, pisbn, eisbn, 'find_imprint')
 
 # getting resource_dir based on imprint, for logo
 resource_dir = getResourceDir(imprint, imprint_json, 'get_resource_dir')
