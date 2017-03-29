@@ -43,19 +43,20 @@ end
 
 # Find any custom metadata overrides that users added to the file
 def getMetaElement(file, name, logkey='')
+  logstring = "none"
   metaelement = File.read(file).match(/(<meta name="#{name}" content=")(.*?)("\/>)/i)
   unless metaelement.nil?
     metaelement = HTMLEntities.new.decode(metaelement[2])
+    logstring = metaelement
   end
   return metaelement
 rescue => logstring
-  return ''
 ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
 def findImprint(file, pisbn, eisbn, logkey='')
-  logstring = "none"
+  logstring = "Not Found"
 
   if pisbn.length == 13
     thissql = exactSearchSingleKey(pisbn, "EDITION_EAN")
