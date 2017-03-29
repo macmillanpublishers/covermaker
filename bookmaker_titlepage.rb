@@ -143,7 +143,6 @@ def checkForOldTitlepages(coverdir, logkey='')
     logstring = "Found an archived POD titlepage"
     oldtitlepage = oldpodtitlepage
   end
-  puts logstring
   return oldtitlepage
 rescue => logstring
   return ''
@@ -165,7 +164,6 @@ def checkForSubmittedTitlepages(submitted_images, logkey='')
     logstring = "Found a new POD titlepage"
     newtitlepage = ptparr.find { |e| /[\/|\\]titlepage\./ =~ e }
   end
-  puts logstring
   return newtitlepage
 rescue => logstring
   return ''
