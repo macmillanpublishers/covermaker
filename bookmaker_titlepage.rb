@@ -51,6 +51,7 @@ def getMetaElement(file, name, logkey='')
   end
   return metaelement
 rescue => logstring
+  return ''
 ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
@@ -92,6 +93,7 @@ def findImprint(file, pisbn, eisbn, logkey='')
 
   return imprint
 rescue => logstring
+  return ''
 ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
