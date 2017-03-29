@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'doc_raptor'
 require 'fileutils'
+require 'htmlentities'
 
 require_relative '../bookmaker/core/header.rb'
 require_relative '../utilities/oraclequery.rb'
