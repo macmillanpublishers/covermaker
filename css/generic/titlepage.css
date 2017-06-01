@@ -1360,3 +1360,7 @@ section[data-type="preface"] {
   page: front;
 }
 nav[data-type="toc"]{display:none;}
+
+header {
+   display: none;
+}
