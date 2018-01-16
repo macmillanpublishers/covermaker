@@ -239,24 +239,55 @@ ensure
 end
 
 def generateTitlepage(coverdir, cover_pdf, pdf_html, testing_value, logkey='')
-  FileUtils.cd(coverdir)
-  File.open(cover_pdf, "w+b") do |f|
-    f.write DocRaptor.create(:document_content => pdf_html,
-                             :name             => "titlepage.pdf",
-                             :document_type    => "pdf",
-                             :strict			     => "none",
-                             :test             => "#{testing_value}",
-  	                         :prince_options	 => {
-  	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
-  	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
-                                 :javascript       => "true"
-  							             }
-                         		)
+  if Bkmkr::Tools.os == "mac" or Bkmkr::Tools.os == "unix"
+    princecmd = "prince"
+  elsif Bkmkr::Tools.os == "windows"
+    princecmd = File.join(Bkmkr::Paths.resource_dir, "Program Files (x86)", "Prince", "engine", "bin", "prince.exe")
+    princecmd = "\"#{princecmd}\""
+  end
+  if Bkmkr::Tools.pdfprocessor == "prince"
+    # css is already embedded, don't need -s flag for external stylesheet
+    `#{princecmd} --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html}\" -o \"#{cover_pdf}\"`
+  elsif Bkmkr::Tools.pdfprocessor == "docraptor"
+    FileUtils.cd(coverdir)
+    File.open(cover_pdf, "w+b") do |f|
+      f.write DocRaptor.create(:document_content => pdf_html,
+                               :name             => "titlepage.pdf",
+                               :document_type    => "pdf",
+                               :strict			     => "none",
+                               :test             => "#{testing_value}",
+    	                         :prince_options	 => {
+    	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
+    	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
+                                   :javascript       => "true"
+    							             }
+                           		)
+    end
   end
 rescue => logstring
 ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
+
+# def generateTitlepage(coverdir, cover_pdf, pdf_html, testing_value, logkey='')
+#   FileUtils.cd(coverdir)
+#   File.open(cover_pdf, "w+b") do |f|
+#     f.write DocRaptor.create(:document_content => pdf_html,
+#                              :name             => "titlepage.pdf",
+#                              :document_type    => "pdf",
+#                              :strict			     => "none",
+#                              :test             => "#{testing_value}",
+#   	                         :prince_options	 => {
+#   	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
+#   	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
+#                                  :javascript       => "true"
+#   							             }
+#                          		)
+#   end
+# rescue => logstring
+# ensure
+#   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+# end
 
 def convertGeneratedTitlepage(cover_pdf, final_cover, logkey='')
   `convert -density 150 -colorspace sRGB "#{cover_pdf}" -quality 100 -sharpen 0x1.0 -resize 600 -background white -flatten "#{final_cover}"`
@@ -317,9 +348,9 @@ resource_dir = getResourceDir(imprint, imprint_json, 'get_resource_dir')
 # via docraptor. This auth data should be housed in
 # separate files, as laid out in the following block.
 docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_key.txt")
-ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
-ftp_pass = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_pass.txt")
-ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
+# ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
+# ftp_pass = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_pass.txt")
+# ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
 submitted_images = Bkmkr::Paths.submitted_images
 template_html = File.join(Bkmkr::Paths.project_tmp_dir, "titlepage.html")
 pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css")
