@@ -245,25 +245,25 @@ def generateTitlepage(coverdir, cover_pdf, pdf_html, testing_value, logkey='')
     princecmd = File.join(Bkmkr::Paths.resource_dir, "Program Files (x86)", "Prince", "engine", "bin", "prince.exe")
     princecmd = "\"#{princecmd}\""
   end
-  if Bkmkr::Tools.pdfprocessor == "prince"
+  # if Bkmkr::Tools.pdfprocessor == "prince"
     # css is already embedded, don't need -s flag for external stylesheet
     `#{princecmd} --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html}\" -o \"#{cover_pdf}\"`
-  elsif Bkmkr::Tools.pdfprocessor == "docraptor"
-    FileUtils.cd(coverdir)
-    File.open(cover_pdf, "w+b") do |f|
-      f.write DocRaptor.create(:document_content => pdf_html,
-                               :name             => "titlepage.pdf",
-                               :document_type    => "pdf",
-                               :strict			     => "none",
-                               :test             => "#{testing_value}",
-    	                         :prince_options	 => {
-    	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
-    	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
-                                   :javascript       => "true"
-    							             }
-                           		)
-    end
-  end
+  # elsif Bkmkr::Tools.pdfprocessor == "docraptor"
+  #   FileUtils.cd(coverdir)
+  #   File.open(cover_pdf, "w+b") do |f|
+  #     f.write DocRaptor.create(:document_content => pdf_html,
+  #                              :name             => "titlepage.pdf",
+  #                              :document_type    => "pdf",
+  #                              :strict			     => "none",
+  #                              :test             => "#{testing_value}",
+  #   	                         :prince_options	 => {
+  #   	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
+  #   	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
+  #                                  :javascript       => "true"
+  #   							             }
+  #                          		)
+  #   end
+  # end
 rescue => logstring
 ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
