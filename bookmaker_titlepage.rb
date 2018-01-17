@@ -15,6 +15,7 @@ local_log_hash, @log_hash = Bkmkr::Paths.setLocalLoghash
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
 pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
 imprint_json = File.join(Bkmkr::Paths.scripts_dir, "bookmaker_addons", "imprints.json")
+watermark_css = File.join(Bkmkr::Paths.scripts_dir, covermaker, css, generic, 'watermark.css')
 
 testing_value_file = File.join(Bkmkr::Paths.resource_dir, "staging.txt")
 
@@ -255,7 +256,7 @@ ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-def generateTitlepage(coverdir, cover_pdf, pdf_html_contents, pdf_html_file, cover_css_file, testing_value, logkey='')
+def generateTitlepage(coverdir, cover_pdf, pdf_html_contents, pdf_html_file, cover_css_file, testing_value, watermark_css, logkey='')
   if Bkmkr::Tools.os == "mac" or Bkmkr::Tools.os == "unix"
     princecmd = "prince"
   elsif Bkmkr::Tools.os == "windows"
@@ -263,7 +264,11 @@ def generateTitlepage(coverdir, cover_pdf, pdf_html_contents, pdf_html_file, cov
     princecmd = "\"#{princecmd}\""
   end
   if Bkmkr::Tools.pdfprocessor == "prince"
-    output = `#{princecmd} -s \"#{cover_css_file}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\"`
+    if testing_value == false
+      output = `#{princecmd} -s \"#{cover_css_file}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\"`
+    elsif testing_value == true
+      output = `#{princecmd} -s \"#{cover_css_file}\" -s \"#{watermark_css}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\"`
+    end
     @log_hash['prince_output'] = output
   elsif Bkmkr::Tools.pdfprocessor == "docraptor"
     FileUtils.cd(coverdir)
@@ -417,7 +422,7 @@ DocRaptor.api_key "#{Bkmkr::Keys.docraptor_key}"
 # Create the titlepage PDF
 unless gen == false
   @log_hash['titlepage_status'] =  "Generating titlepage."
-  generateTitlepage(coverdir, cover_pdf, pdf_html_contents, template_html, cover_css_file, testing_value, 'generate_titlepage')
+  generateTitlepage(coverdir, cover_pdf, pdf_html_contents, template_html, cover_css_file, testing_value, watermark_css, 'generate_titlepage')
 
   # convert the PDF to jpg
   convertGeneratedTitlepage(cover_pdf, final_cover, 'convert_generated_titlepage_to_jpg')
