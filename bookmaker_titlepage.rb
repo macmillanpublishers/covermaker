@@ -15,7 +15,7 @@ local_log_hash, @log_hash = Bkmkr::Paths.setLocalLoghash
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
 pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
 imprint_json = File.join(Bkmkr::Paths.scripts_dir, "bookmaker_addons", "imprints.json")
-watermark_css = File.join(Bkmkr::Paths.scripts_dir, covermaker, css, generic, 'watermark.css')
+watermark_css = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css", "generic", "watermark.css")
 
 testing_value_file = File.join(Bkmkr::Paths.resource_dir, "staging.txt")
 
@@ -264,9 +264,9 @@ def generateTitlepage(coverdir, cover_pdf, pdf_html_contents, pdf_html_file, cov
     princecmd = "\"#{princecmd}\""
   end
   if Bkmkr::Tools.pdfprocessor == "prince"
-    if testing_value == false
+    if testing_value == "false"
       output = `#{princecmd} -s \"#{cover_css_file}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\"`
-    elsif testing_value == true
+    elsif testing_value == "true"
       output = `#{princecmd} -s \"#{cover_css_file}\" -s \"#{watermark_css}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\"`
     end
     @log_hash['prince_output'] = output
