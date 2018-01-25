@@ -157,7 +157,3 @@ div.logo img {
   max-height: 100%;
   max-width: 1in;
 }
-
-img {
-	prince-image-magic: ignore-icc-profile;
-}
