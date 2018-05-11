@@ -15,6 +15,7 @@ local_log_hash, @log_hash = Bkmkr::Paths.setLocalLoghash
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
 pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
 imprint_json = File.join(Bkmkr::Paths.scripts_dir, "bookmaker_addons", "imprints.json")
+watermark_css = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css", "generic", "watermark.css")
 
 testing_value_file = File.join(Bkmkr::Paths.resource_dir, "staging.txt")
 
@@ -228,30 +229,62 @@ ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-def editPdfHtml(template_html, embedcss, resource_dir, logkey='')
-  pdf_html = File.read(template_html).gsub(/<\/head>/,"<style>#{embedcss}</style></head>")
-                                     .gsub(/RESOURCEDIR/,"#{resource_dir}").to_s
-  return pdf_html
+def updateHTMLmetainfo(template_html, resource_dir, logkey='')
+  pdf_html_contents = File.read(template_html).gsub(/RESOURCEDIR/,"#{resource_dir}")
+  return pdf_html_contents
 rescue => logstring
   return ''
 ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-def generateTitlepage(coverdir, cover_pdf, pdf_html, testing_value, logkey='')
-  FileUtils.cd(coverdir)
-  File.open(cover_pdf, "w+b") do |f|
-    f.write DocRaptor.create(:document_content => pdf_html,
-                             :name             => "titlepage.pdf",
-                             :document_type    => "pdf",
-                             :strict			     => "none",
-                             :test             => "#{testing_value}",
-  	                         :prince_options	 => {
-  	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
-  	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
-                                 :javascript       => "true"
-  							             }
-                         		)
+## wrapping a Mcmlln::Tools method in a new method for this script; to return a result for json_logfile
+def overwriteHtml(path, filecontents, logkey='')
+	Mcmlln::Tools.overwriteFile(path, filecontents)
+rescue => logstring
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+# for DocRaptor
+def embedCSSinHTML(pdf_html_contents, embedcss, logkey='')
+  pdf_html_contents = pdf_html_contents.gsub(/<\/head>/,"<style>#{embedcss}</style></head>").to_s
+  return pdf_html_contents
+rescue => logstring
+  return ''
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
+def generateTitlepage(coverdir, cover_pdf, pdf_html_contents, pdf_html_file, cover_css_file, testing_value, watermark_css, logkey='')
+  if Bkmkr::Tools.os == "mac" or Bkmkr::Tools.os == "unix"
+    princecmd = "prince"
+  elsif Bkmkr::Tools.os == "windows"
+    princecmd = File.join(Bkmkr::Paths.resource_dir, "Program Files (x86)", "Prince", "engine", "bin", "prince.exe")
+    princecmd = "\"#{princecmd}\""
+  end
+  if Bkmkr::Tools.pdfprocessor == "prince"
+    if testing_value == "false"
+      output = `#{princecmd} -s \"#{cover_css_file}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\"`
+    elsif testing_value == "true"
+      output = `#{princecmd} -s \"#{cover_css_file}\" -s \"#{watermark_css}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\"`
+    end
+    @log_hash['prince_output'] = output
+  elsif Bkmkr::Tools.pdfprocessor == "docraptor"
+    FileUtils.cd(coverdir)
+    File.open(cover_pdf, "w+b") do |f|
+      f.write DocRaptor.create(:document_content => pdf_html_contents,
+                               :name             => "titlepage.pdf",
+                               :document_type    => "pdf",
+                               :strict			     => "none",
+                               :test             => "#{testing_value}",
+    	                         :prince_options	 => {
+    	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
+    	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
+                                   :javascript       => "true"
+    							             }
+                           		)
+    end
   end
 rescue => logstring
 ensure
@@ -317,9 +350,9 @@ resource_dir = getResourceDir(imprint, imprint_json, 'get_resource_dir')
 # via docraptor. This auth data should be housed in
 # separate files, as laid out in the following block.
 docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_key.txt")
-ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
-ftp_pass = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_pass.txt")
-ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
+# ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
+# ftp_pass = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_pass.txt")
+# ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
 submitted_images = Bkmkr::Paths.submitted_images
 template_html = File.join(Bkmkr::Paths.project_tmp_dir, "titlepage.html")
 pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css")
@@ -375,7 +408,13 @@ embedcss = getEmbedCss(cover_css_file, 'get_embed_css')
 # prepare the HTML from which to generate the titlepage PDF
 localRunNode(gettitlepagejs, "#{Bkmkr::Paths.outputtmp_html} #{template_html}", 'get_titlepage_js')
 
-pdf_html = editPdfHtml(template_html, embedcss, resource_dir, 'edit_pdf_html')
+pdf_html_contents = updateHTMLmetainfo(template_html, resource_dir, 'update_html_metainfo')
+
+# write updated html back to file for prince conversion
+overwriteHtml(template_html, pdf_html_contents, 'write_updated_template_html_to_file')
+
+# prepare raw html with embedcss for Docraptor conversion
+pdf_html_contents = embedCSSinHTML(pdf_html_contents, embedcss, 'embed_css_in_html')
 
 # Docraptor setup
 DocRaptor.api_key "#{Bkmkr::Keys.docraptor_key}"
@@ -383,7 +422,7 @@ DocRaptor.api_key "#{Bkmkr::Keys.docraptor_key}"
 # Create the titlepage PDF
 unless gen == false
   @log_hash['titlepage_status'] =  "Generating titlepage."
-  generateTitlepage(coverdir, cover_pdf, pdf_html, testing_value, 'generate_titlepage')
+  generateTitlepage(coverdir, cover_pdf, pdf_html_contents, template_html, cover_css_file, testing_value, watermark_css, 'generate_titlepage')
 
   # convert the PDF to jpg
   convertGeneratedTitlepage(cover_pdf, final_cover, 'convert_generated_titlepage_to_jpg')
