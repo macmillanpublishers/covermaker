@@ -14,6 +14,7 @@ local_log_hash, @log_hash = Bkmkr::Paths.setLocalLoghash
 pdftmp_dir = File.join(Bkmkr::Paths.project_tmp_dir_img, "pdftmp")
 pdfmaker_dir = File.join(Bkmkr::Paths.core_dir, "bookmaker_pdfmaker")
 watermark_css = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css", "generic", "watermark.css")
+cover_html = File.join(Bkmkr::Paths.project_tmp_dir, "cover.html")
 
 # Authentication data is required to use docraptor and
 # to post images and other assets to the ftp for inclusion
@@ -326,7 +327,7 @@ end
 pdf_html_contents = updateHTMLmetainfo(template_html, booktitle, booksubtitle, authorname, resource_dir, 'update_html_metainfo')
 
 # write updated html back to file for prince conversion
-overwriteHtml(template_html, pdf_html_contents, 'write_updated_templateHTML_to_file')
+overwriteHtml(cover_html, pdf_html_contents, 'write_updated_templateHTML_to_file')
 
 # prepare raw html with embedcss for Docraptor conversion
 pdf_html_contents = embedCSSinHTML(pdf_html_contents, embedcss, 'embed_css_in_html')
@@ -356,7 +357,7 @@ elsif gen == true
   @log_hash['cover_status'] = "Generating cover."
   cover_pdf = File.join(coverdir, "cover.pdf")
   # convert to pdf via prince or docraptor
-  generateCover(coverdir, cover_pdf, pdf_html_contents, template_html, cover_css_file, testing_value, watermark_css, 'generate_cover')
+  generateCover(coverdir, cover_pdf, pdf_html_contents, cover_html, cover_css_file, testing_value, watermark_css, 'generate_cover')
   # convert to jpg
   convertGeneratedCover(cover_pdf, final_cover, 'convert_generated_cover_to_jpg')
   # delete the PDF
