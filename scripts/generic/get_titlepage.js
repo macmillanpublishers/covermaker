@@ -2,21 +2,31 @@ var fs = require('fs');
 var cheerio = require('cheerio');
 var file = process.argv[2];
 var newfile = process.argv[3];
+var doctemplatetype = process.argv[4];
 
 fs.readFile(file, function editContent (err, contents) {
   $ = cheerio.load(contents, {
           xmlMode: true
         });
 
-  if ( $('.TitlepageBookSubtitlestit + .TitlepageAuthorNameau').length ) {
+  //vars for target stylenames based on doctemplatetype
+  if (doctemplatetype == 'rsuite') {
+    var anthologyselector = 'section[data-type="titlepage"] > .SubtitleSttl + .Author1Au1'
+    var logo_stylename = 'Logo-PlacementLogo'
+  } else {
+    var anthologyselector = '.TitlepageBookSubtitlestit + .TitlepageAuthorNameau'
+    var logo_stylename = 'TitlepageLogologo'
+  }
+
+  if ( $(anthologyselector).length ) {
     $('section[data-type="titlepage"]').addClass("anthology");
   };
 
-  if ( $('.TitlepageLogologo').length ) {
+  if ( $('.' + logo_stylename).length ) {
     var logoimg = '<img src="https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/RESOURCEDIR/logo.jpg"></img>';
-    $('.TitlepageLogologo').empty().append(logoimg);
-  } else { 
-    var logoholder = '<p class="TitlepageLogologo"><img src="https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/RESOURCEDIR/logo.jpg"/></p>';
+    $('.' + logo_stylename).empty().append(logoimg);
+  } else {
+    var logoholder = '<p class="' + logo_stylename + '"><img src="https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/RESOURCEDIR/logo.jpg"/></p>';
     $('section[data-type="titlepage"]').append(logoholder);
   };
 

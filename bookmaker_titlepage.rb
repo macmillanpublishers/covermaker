@@ -4,6 +4,7 @@ require 'fileutils'
 require 'htmlentities'
 
 require_relative '../bookmaker/core/header.rb'
+require_relative '../bookmaker/core/metadata.rb'
 require_relative '../utilities/oraclequery.rb'
 require_relative '../utilities/isbn_finder.rb'
 
@@ -21,6 +22,15 @@ testing_value_file = File.join(Bkmkr::Paths.resource_dir, "staging.txt")
 
 # ---------------------- METHODS
 
+def readConfigJson(logkey='')
+  data_hash = Mcmlln::Tools.readjson(Metadata.configfile)
+  return data_hash
+rescue => logstring
+  return {}
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
 def testingValue(file, logkey='')
   # change to DocRaptor 'test' mode when running from staging server
   testing_value = "false"
@@ -33,8 +43,8 @@ ensure
 end
 
 # wrapping a method from isbnFinder.rb so we can get output for json_logfile
-def getIsbns(file, filename, logkey='')
-  pisbn, eisbn, allworks = findBookISBNs(file, filename)
+def getIsbns(file, filename, isbn_stylename, logkey='')
+  pisbn, eisbn, allworks = findBookISBNs(file, filename, isbn_stylename)
   return pisbn, eisbn, allworks
 rescue => logstring
   return '','',''
@@ -331,12 +341,21 @@ end
 
 # ---------------------- PROCESSES
 
+data_hash = readConfigJson('read_config_json')
+#local definition(s) based on config.json
+doctemplatetype = data_hash['doctemplatetype']
+if doctemplatetype == 'rsuite'
+  isbn_stylename = 'cs-isbnisbn'
+else
+  isbn_stylename = 'spanISBNisbn'
+end
+
 # run method: testingValue
 testing_value = testingValue(testing_value_file, 'testing_value_test')
 @log_hash['running_on_testing_server'] = testing_value
 
 # determine ISBNs
-pisbn, eisbn, allworks = getIsbns(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename, 'get_isbns')
+pisbn, eisbn, allworks = getIsbns(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename, isbn_stylename, 'get_isbns')
 
 # get imprint for logo placement
 imprint = findImprint(Bkmkr::Paths.outputtmp_html, pisbn, eisbn, 'find_imprint')
@@ -406,7 +425,7 @@ cover_css_file = File.join(pdf_css_dir, "generic", "titlepage.css")
 embedcss = getEmbedCss(cover_css_file, 'get_embed_css')
 
 # prepare the HTML from which to generate the titlepage PDF
-localRunNode(gettitlepagejs, "#{Bkmkr::Paths.outputtmp_html} #{template_html}", 'get_titlepage_js')
+localRunNode(gettitlepagejs, "#{Bkmkr::Paths.outputtmp_html} #{template_html} #{doctemplatetype}", 'get_titlepage_js')
 
 pdf_html_contents = updateHTMLmetainfo(template_html, resource_dir, 'update_html_metainfo')
 
