@@ -346,8 +346,10 @@ data_hash = readConfigJson('read_config_json')
 doctemplatetype = data_hash['doctemplatetype']
 if doctemplatetype == 'rsuite'
   isbn_stylename = 'cs-isbnisbn'
+  pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "rsuite_assets", "css")
 else
   isbn_stylename = 'spanISBNisbn'
+  pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css")
 end
 
 # run method: testingValue
@@ -374,7 +376,6 @@ docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_ke
 # ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
 submitted_images = Bkmkr::Paths.submitted_images
 template_html = File.join(Bkmkr::Paths.project_tmp_dir, "titlepage.html")
-pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css")
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
 
 # paths that depend on the ISBN; must follow the isbn_finder
@@ -420,6 +421,7 @@ if final_cover.empty? or final_cover.nil?
 end
 
 # CSS that will format the final titlepage PDF
+V this line
 cover_css_file = File.join(pdf_css_dir, "generic", "titlepage.css")
 
 embedcss = getEmbedCss(cover_css_file, 'get_embed_css')
