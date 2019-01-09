@@ -421,7 +421,6 @@ if final_cover.empty? or final_cover.nil?
 end
 
 # CSS that will format the final titlepage PDF
-V this line
 cover_css_file = File.join(pdf_css_dir, "generic", "titlepage.css")
 
 embedcss = getEmbedCss(cover_css_file, 'get_embed_css')
