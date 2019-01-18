@@ -421,6 +421,10 @@ section.adcard {
 	text-indent: 0;
 }
 
+section[data-type="titlepage"] > * {
+	text-align: center;
+}
+
 section[data-type="titlepage"] > h1 {
 	font-family: "ArnoPro", serif;
 	font-weight: bold;
@@ -442,9 +446,9 @@ section[data-type="titlepage"] > h1:first-child {
 	margin-top: 26pt;
 }
 
-h1 + *[class*="TitlepageBookSubtitlestit"],
-h1 + *[class*="TitlepageSeriesTitleser"] {
-	margin-top: 24pt;
+h1 ~ *[class*="TitlepageBookSubtitlestit"],
+h1 ~ *[class*="TitlepageSeriesTitleser"] {
+	margin-top: 32pt;
 	margin-bottom: 0;
 }
 
@@ -456,6 +460,7 @@ h1 + *[class*="TitlepageSeriesTitleser"] {
 	font-style: italic;
 	text-align: center;
 	text-indent: 0;
+	text-transform: uppercase;
 }
 
 *[class*="TitlepageBookSubtitlestit"]:first-child,
@@ -463,9 +468,16 @@ h1 + *[class*="TitlepageSeriesTitleser"] {
 	margin-top: 6pt;
 }
 
+section.anthology *[class*="TitlepageBookSubtitlestit"] {
+	font-size: 18pt;
+	font-weight: bold;
+	font-style: normal;
+}
+
 *[class*="TitlepageTranslatorNametran"],
 *[class*="TitlepageContributorNamecon"] {
 	text-align: center;
+	text-transform: uppercase;
 }
 
 *[class*="TitlepageAuthorNameau"] {
@@ -491,6 +503,16 @@ section[data-type="titlepage"] *[class*="TitlepageAuthorNameau"] + *[class*="Tit
 	margin-bottom: 64pt;
 }
 
+section.anthology *[class*="TitlepageAuthorNameau"] {
+	float: none;
+	margin-top: 16pt;
+	margin-bottom: 32pt;
+}
+
+section.anthology *[class*="TitlepageAuthorNameau"]:last-of-type {
+	margin-bottom: 32pt;
+}
+
 section[data-type="titlepage"] *[class*="TitlepageImprintLineimp"] {
 	float: bottom;
 	text-align: center;
@@ -498,24 +520,18 @@ section[data-type="titlepage"] *[class*="TitlepageImprintLineimp"] {
 }
 
 section[data-type="titlepage"] *[class*="TitlepageLogologo"] {
-	/*content: " ";
-	background-image: url('https://raw.githubusercontent.com/macmillanpublishers/covermaker/master/images/swerve/logo.png');*/
+	content: " ";
+	background-image: url('https://raw.githubusercontent.com/macmillanpublishers/covermaker/master/images/swerve/logo.jpg');
 	background-position: center bottom;
-	background-size: auto 1.8in;
+	background-size: auto 0.3in;
 	background-repeat: no-repeat;
 	display: block;
 	float: bottom;
 	width: 100%;
 	height: 0.5in;
-	text-indent: 0;
 	text-align: center;
-	margin-bottom: 0.2in;
 	margin-top: 48pt;
-}
-
-section[data-type="titlepage"] *[class*="TitlepageLogologo"] img {
-	max-height: 100%;
-	max-width: 1in;
+	margin-bottom: 0.2in;
 }
 
 *[class*="TitlepageCitiescit"], *[class*="TitlepagePublisherNamepub"], *[class*="TitlepageImprintLineimp"] {
@@ -1354,13 +1370,4 @@ p.BookmakerPageBreakbr,
 
 *[class*="loosen"], .bookmakerloosenbkl {
   letter-spacing: 0.2pt;
-}
-
-section[data-type="preface"] {
-  page: front;
-}
-nav[data-type="toc"]{display:none;}
-
-header {
-   display: none;
 }
