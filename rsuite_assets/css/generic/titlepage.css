@@ -1604,7 +1604,7 @@ blockquote[data-type=recipe] {
 /* --------------- LISTS */
 p[class^="List-Head"] {
   padding: 0;
-  margin: $gridheight 0 0 0;
+  margin: 16pt 0 0 0;
 }
 
 p[class*="-Space-Break"] + div.runfoot + div.runheadright + div.runheadleft + p[class^="List-Head"],
