@@ -508,7 +508,7 @@ section[data-type="titlepage"] p[class*="Author1Au1"] {
 	text-indent: 0;
 	text-align: center;
 	text-transform: uppercase;
-	string-set: author content(); {
+	string-set: author content();
 	float: bottom;
 	margin-top: 32pt;
 }
@@ -550,8 +550,8 @@ section[data-type="titlepage"] *[class*="Logo-PlacementLogo"] img {
 	max-width: 1in;
 }
 
-section[data-type="titlepage"] *[class*="CitiesCit"], 
-section[data-type="titlepage"] *[class*="TitlepagePublisherNamepub"], 
+section[data-type="titlepage"] *[class*="CitiesCit"],
+section[data-type="titlepage"] *[class*="TitlepagePublisherNamepub"],
 section[data-type="titlepage"] *[class*="ImprintImp"] {
 	font-family: "ArnoPro", serif;
 	font-variant: small-caps;
