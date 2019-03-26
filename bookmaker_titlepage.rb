@@ -44,8 +44,8 @@ end
 
 # wrapping a method from isbnFinder.rb so we can get output for json_logfile
 def getIsbns(file, filename, isbn_stylename, logkey='')
-  pisbn, eisbn, allworks = findBookISBNs(file, filename, isbn_stylename)
-  return pisbn, eisbn, allworks
+  pisbn, eisbn, allworks, lead_edition, typeset_from = findBookISBNs(file, filename, isbn_stylename)
+  return pisbn, eisbn, allworks, lead_edition, typeset_from
 rescue => logstring
   return '','',''
 ensure
@@ -357,7 +357,7 @@ testing_value = testingValue(testing_value_file, 'testing_value_test')
 @log_hash['running_on_testing_server'] = testing_value
 
 # determine ISBNs
-pisbn, eisbn, allworks = getIsbns(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename, isbn_stylename, 'get_isbns')
+pisbn, eisbn, allworks, lead_edition, typeset_from = getIsbns(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename, isbn_stylename, 'get_isbns')
 
 # get imprint for logo placement
 imprint = findImprint(Bkmkr::Paths.outputtmp_html, pisbn, eisbn, 'find_imprint')
