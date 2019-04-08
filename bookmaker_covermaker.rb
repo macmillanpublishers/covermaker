@@ -187,11 +187,15 @@ def generateCover(coverdir, cover_pdf, pdf_html_contents, pdf_html_file, cover_c
     princecmd = "\"#{princecmd}\""
   end
   if Bkmkr::Tools.pdfprocessor == "prince"
-    if testing_value == "false"
-      output = `#{princecmd} -s \"#{cover_css_file}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\"`
-    elsif testing_value == "true"
-      output = `#{princecmd} -s \"#{cover_css_file}\" -s \"#{watermark_css}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\"`
+    if !Bkmkr::Keys.http_username.empty? && !Bkmkr::Keys.http_password.empty?
+      princecmd = "#{princecmd} -s \"#{cover_css_file}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\""
+    else
+      princecmd = "#{princecmd} -s \"#{cover_css_file}\" --javascript \"#{pdf_html_file}\" -o \"#{cover_pdf}\""
     end
+    if testing_value == "true"
+      princecmd = "#{princecmd} -s \"#{watermark_css}\""
+    end
+    output = `#{princecmd}`  
     @log_hash['prince_output'] = output
   elsif Bkmkr::Tools.pdfprocessor == "docraptor"
     FileUtils.cd(coverdir)
