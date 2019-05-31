@@ -29,7 +29,7 @@ DocRaptor.api_key "#{docraptor_key}"
 
 testing_value_file = File.join(Bkmkr::Paths.resource_dir, "staging.txt")
 
-coverdir = Bkmkr::Paths.submitted_images
+coverdir = Bkmkr::Paths.project_tmp_dir_submitted
 archivedir = File.join(Bkmkr::Paths.done_dir, Metadata.pisbn, "cover")
 
 # ---------------------- METHODS
@@ -195,7 +195,7 @@ def generateCover(coverdir, cover_pdf, pdf_html_contents, pdf_html_file, cover_c
     if testing_value == "true"
       princecmd = "#{princecmd} -s \"#{watermark_css}\""
     end
-    output = `#{princecmd}`  
+    output = `#{princecmd}`
     @log_hash['prince_output'] = output
   elsif Bkmkr::Tools.pdfprocessor == "docraptor"
     FileUtils.cd(coverdir)

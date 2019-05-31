@@ -378,7 +378,8 @@ docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_ke
 # ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
 # ftp_pass = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_pass.txt")
 # ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
-submitted_images = Bkmkr::Paths.submitted_images
+# submitted_images = Bkmkr::Paths.submitted_images
+submitted_images = Bkmkr::Paths.project_tmp_dir_submitted
 template_html = File.join(Bkmkr::Paths.project_tmp_dir, "titlepage.html")
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
 
