@@ -383,18 +383,19 @@ submitted_images = Bkmkr::Paths.project_tmp_dir_submitted
 template_html = File.join(Bkmkr::Paths.project_tmp_dir, "titlepage.html")
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
 
-# paths that depend on the ISBN; must follow the isbn_finder
-coverdir = File.join(Bkmkr::Paths.done_dir, pisbn, "images")
-cover_pdf = File.join(coverdir, "titlepage.pdf")
-final_dir = File.join(Bkmkr::Paths.done_dir, pisbn)
-final_dir_images = File.join(Bkmkr::Paths.done_dir, pisbn, "images")
-logdir = File.join(Bkmkr::Paths.done_dir, pisbn, "logs")
-titlepagelog = File.join(logdir, "titlepage.txt")
-arch_podtp = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "titlepage.jpg")
-arch_epubtp = File.join(Bkmkr::Paths.done_dir, pisbn, "images", "epubtitlepage.jpg")
+# this all depends on the ISBN; must follow the isbn_finder
+final_dir = Metadata.getFinalDir(Bkmkr::Paths.project_tmp_dir, Bkmkr::Paths.done_dir, pisbn, Bkmkr::Paths.unique_run_id, 'get_final_dir')
 
-# create the final archive dirs if they don't exist yet
-makeFolder(final_dir, 'create_final_dir')
+# dependencies on final_dir:
+coverdir = File.join(final_dir, "images")
+cover_pdf = File.join(coverdir, "titlepage.pdf")
+final_dir_images = File.join(final_dir, "images")
+logdir = File.join(final_dir, "logs")
+titlepagelog = File.join(logdir, "titlepage.txt")
+arch_podtp = File.join(final_dir, "images", "titlepage.jpg")
+arch_epubtp = File.join(final_dir, "images", "epubtitlepage.jpg")
+
+# create the final img archive dir if it doesn't exist yet
 makeFolder(final_dir_images, 'create_final_dir_images')
 
 # create the logging dir if it doesn't exist yet
