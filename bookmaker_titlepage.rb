@@ -384,7 +384,7 @@ template_html = File.join(Bkmkr::Paths.project_tmp_dir, "titlepage.html")
 gettitlepagejs = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "scripts", "generic", "get_titlepage.js")
 
 # this all depends on the ISBN; must follow the isbn_finder
-final_dir = Metadata.getFinalDir(Bkmkr::Paths.project_tmp_dir, Bkmkr::Paths.done_dir, pisbn, Bkmkr::Paths.unique_run_id, 'get_final_dir')
+final_dir, @log_hash = Metadata.setupFinalDir(Bkmkr::Paths.project_tmp_dir, Bkmkr::Paths.done_dir, pisbn, Bkmkr::Paths.unique_run_id, @log_hash, 'metadata.rb-setup_final_dir')
 
 # dependencies on final_dir:
 coverdir = File.join(final_dir, "images")
