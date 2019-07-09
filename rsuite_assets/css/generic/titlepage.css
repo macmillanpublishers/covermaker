@@ -551,7 +551,7 @@ section[data-type="titlepage"] *[class*="Logo-PlacementLogo"] img {
 }
 
 section[data-type="titlepage"] *[class*="CitiesCit"],
-section[data-type="titlepage"] *[class*="TitlepagePublisherNamepub"],
+section[data-type="titlepage"] *[class*="PublisherPub"],
 section[data-type="titlepage"] *[class*="ImprintImp"] {
 	font-family: "ArnoPro", serif;
 	font-variant: small-caps;
