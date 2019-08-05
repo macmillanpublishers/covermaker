@@ -518,8 +518,18 @@ section[data-type="titlepage"] p[class*="Author1Au1"] + p[class*="Author1Au1"] {
 	margin-top: 16pt;
 }
 
+section[data-type="titlepage"] p[class*="Author2Au2"],
+section[data-type="titlepage"] p[class*="Author3Au3"] {
+	text-indent: 0;
+	text-align: center;
+	float: bottom;
+	margin-top: 16pt;
+}
+
 section[data-type="titlepage"] p[class*="Author1Au1"]:last-of-type,
-section[data-type="titlepage"] p[class*="Author1Au1"] + p[class*="Author1Au1"]:last-of-type {
+section[data-type="titlepage"] p[class*="Author1Au1"] + p[class*="Author1Au1"]:last-of-type,
+section[data-type="titlepage"] p[class*="Author2Au2"]:last-of-type,
+section[data-type="titlepage"] p[class*="Author3Au3"]:last-of-type {
 	margin-bottom: 64pt;
 }
 
