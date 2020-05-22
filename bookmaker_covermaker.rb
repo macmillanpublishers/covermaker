@@ -188,8 +188,8 @@ ensure
 end
 
 def watermarkCover(watermark, watermarktmp, final_cover, logkey='')
-  # current watermark image is 4000px wide, ideal crop is around 1900px
-  wmark_ideal_width = 1900
+  # current watermark image is 4000px wide, ideal crop is 1500-1900px
+  wmark_ideal_width = 1700
   FileUtils.cp(watermark, watermarktmp)
   coverwidth = `identify -format "%w" "#{final_cover}"`
   coverwidth = coverwidth.to_f
