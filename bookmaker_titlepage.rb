@@ -43,8 +43,16 @@ ensure
 end
 
 # wrapping a method from isbnFinder.rb so we can get output for json_logfile
-def getIsbns(file, filename, isbn_stylename, logkey='')
-  pisbn, eisbn, allworks = findBookISBNs(file, filename, isbn_stylename)
+def getIsbns(config_hash, file, filename, isbn_stylename, logkey='')
+  eisbn = ''
+  allworks = []
+  if config_hash.has_key?('printid') && config_hash['printid'] != ''
+    pisbn = config_hash['printid']
+  elsif config_hash.has_key?('productid')
+    pisbn = config_hash['productid']
+  else
+    pisbn, eisbn, allworks = findBookISBNs(file, filename, isbn_stylename)
+  end
   return pisbn, eisbn, allworks
 rescue => logstring
   return '','',''
@@ -67,10 +75,12 @@ ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-def findImprint(file, pisbn, eisbn, logkey='')
+def findImprint(config_hash, file, pisbn, eisbn, logkey='')
   logstring = "Not Found"
-
-  if pisbn.length == 13
+  if config_hash.has_key?('imprint') && config_hash['imprint'] != ''
+    imprint = config_hash['imprint']
+    logstring = "Found imprint in config.json: #{imprint}"
+  elsif pisbn.length == 13
     thissql = exactSearchSingleKey(pisbn, "EDITION_EAN")
     isbnhash = runQuery(thissql)
     unless isbnhash.nil? or isbnhash.empty? or !isbnhash
@@ -361,10 +371,10 @@ testing_value = testingValue(testing_value_file, 'testing_value_test')
 @log_hash['running_on_testing_server'] = testing_value
 
 # determine ISBNs
-pisbn, eisbn, allworks = getIsbns(Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename, isbn_stylename, 'get_isbns')
+pisbn, eisbn, allworks = getIsbns(data_hash, Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename, isbn_stylename, 'get_isbns')
 
 # get imprint for logo placement
-imprint = findImprint(Bkmkr::Paths.outputtmp_html, pisbn, eisbn, 'find_imprint')
+imprint = findImprint(data_hash, Bkmkr::Paths.outputtmp_html, pisbn, eisbn, 'find_imprint')
 
 # getting resource_dir based on imprint, for logo
 resource_dir = getResourceDir(imprint, imprint_json, 'get_resource_dir')
