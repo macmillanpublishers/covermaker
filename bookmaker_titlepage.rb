@@ -46,7 +46,7 @@ end
 def getIsbns(config_hash, file, filename, isbn_stylename, logkey='')
   eisbn = ''
   allworks = []
-  if config_hash.has_key?('printid') && config_hash['printid'] != ''
+  if config_hash.has_key?('printid') && config_hash['printid'] != '' && config_hash['printid'] != 'TK'
     pisbn = config_hash['printid']
   elsif config_hash.has_key?('productid')
     pisbn = config_hash['productid']
@@ -77,7 +77,7 @@ end
 
 def findImprint(config_hash, file, pisbn, eisbn, logkey='')
   logstring = "Not Found"
-  if config_hash.has_key?('imprint') && config_hash['imprint'] != ''
+  if config_hash.has_key?('imprint') && config_hash['imprint'] != '' && config_hash['imprint'] != 'TK'
     imprint = config_hash['imprint']
     logstring = "Found imprint in config.json: #{imprint}"
   elsif pisbn.length == 13
@@ -356,7 +356,8 @@ end
 # ---------------------- PROCESSES
 
 data_hash = readConfigJson('read_config_json')
-#local definition(s) based on config.json
+# local definition(s) based on config.json
+# => we use any non-default config.json values to determine which imprint logo to inserted
 doctemplatetype = data_hash['doctemplatetype']
 if doctemplatetype == 'rsuite'
   isbn_stylename = 'cs-isbnisbn'
@@ -372,9 +373,11 @@ testing_value = testingValue(testing_value_file, 'testing_value_test')
 
 # determine ISBNs
 pisbn, eisbn, allworks = getIsbns(data_hash, Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename, isbn_stylename, 'get_isbns')
+@log_hash['pisbn'] = pisbn
 
 # get imprint for logo placement
 imprint = findImprint(data_hash, Bkmkr::Paths.outputtmp_html, pisbn, eisbn, 'find_imprint')
+@log_hash['imprint'] = imprint
 
 # getting resource_dir based on imprint, for logo
 resource_dir = getResourceDir(imprint, imprint_json, 'get_resource_dir')
