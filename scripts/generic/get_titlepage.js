@@ -35,7 +35,11 @@ fs.readFile(file, function editContent (err, contents) {
   $body.append(content)
   var $head = $( '<head></head>' );
   $head.append( $('<title>Generated Titlepage</title>') );
-  var output = $('html').empty().append( $head, $body );
+
+  // replace html with new head and body
+  $('html').empty().append( $head, $body );
+  
+  var output = $.html();
     fs.writeFile(newfile, output, function(err) {
       if(err) {
           return console.log(err);
