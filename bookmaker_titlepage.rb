@@ -46,16 +46,19 @@ end
 def getIsbns(config_hash, file, filename, isbn_stylename, logkey='')
   eisbn = ''
   allworks = []
+  logstring = 'got pisbn from config.json'
+  querystatus = ''
   if config_hash.has_key?('printid') && config_hash['printid'] != '' && config_hash['printid'] != 'TK'
     pisbn = config_hash['printid']
   elsif config_hash.has_key?('productid')
     pisbn = config_hash['productid']
   else
-    pisbn, eisbn, allworks = findBookISBNs(file, filename, isbn_stylename)
+    pisbn, eisbn, allworks, querystatus = findBookISBNs(file, filename, isbn_stylename)
+    logstring = querystatus
   end
-  return pisbn, eisbn, allworks
+  return pisbn, eisbn, allworks, querystatus
 rescue => logstring
-  return '','',''
+  return '','','',''
 ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
@@ -75,34 +78,39 @@ ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-def findImprint(config_hash, file, pisbn, eisbn, logkey='')
+def findImprint(config_hash, file, pisbn, eisbn, querystatus, logkey='')
   logstring = "Not Found"
   if config_hash.has_key?('imprint') && config_hash['imprint'] != '' && config_hash['imprint'] != 'TK'
     imprint = config_hash['imprint']
     logstring = "Found imprint in config.json: #{imprint}"
-  elsif pisbn.length == 13
+  elsif pisbn.length == 13 and (querystatus == '' or querystatus == 'success')
     thissql = exactSearchSingleKey(pisbn, "EDITION_EAN")
-    isbnhash = runQuery(thissql)
-    unless isbnhash.nil? or isbnhash.empty? or !isbnhash
-      imprint = isbnhash["book"]["IMPRINT_DESC"]
-      logstring = "Found imprint in DW: #{imprint}"
-    else
+    isbnhash, querystatus = runQuery(thissql)
+    logstring = querystatus
+    if querystatus == 'success' and (isbnhash.nil? or isbnhash.empty? or !isbnhash)
       imprint = "Macmillan"
       logstring =  "Unable to connect to DW; using default imprint: #{imprint}"
-    end
-  elsif eisbn.length == 13
-    thissql = exactSearchSingleKey(eisbn, "EDITION_EAN")
-    isbnhash = runQuery(thissql)
-    unless isbnhash.nil? or isbnhash.empty? or !isbnhash
+    elsif querystatus == 'success'
       imprint = isbnhash["book"]["IMPRINT_DESC"]
       logstring =  "Found imprint in DW: #{imprint}"
-    else
+    end
+  elsif eisbn.length == 13 and (querystatus == '' or querystatus == 'success')
+    thissql = exactSearchSingleKey(eisbn, "EDITION_EAN")
+    isbnhash, querystatus = runQuery(thissql)
+    logstring = querystatus
+    if querystatus == 'success' and (isbnhash.nil? or isbnhash.empty? or !isbnhash)
       imprint = "Macmillan"
       logstring =  "Unable to connect to DW; using default imprint: #{imprint}"
+    elsif querystatus == 'success'
+      imprint = isbnhash["book"]["IMPRINT_DESC"]
+      logstring =  "Found imprint in DW: #{imprint}"
     end
+  elsif querystatus != '' and querystatus != 'success'
+    imprint = "Macmillan"
+    logstring = "Skipping dw_lookup b/c previous dw_lookup failed; using default imprint: #{imprint}"
   else
     imprint = "Macmillan"
-    logstring =  "No imprint found in DW; using default imprint: #{imprint}"
+    logstring = "No pisbn, isbn, or previously found value for imprint; using default imprint: #{imprint}"
   end
 
   # if there is custom imprint metadata, use that instead of whatever is in the DW
@@ -112,9 +120,9 @@ def findImprint(config_hash, file, pisbn, eisbn, logkey='')
     logstring = metaimprint
   end
 
-  return imprint
+  return imprint, querystatus
 rescue => logstring
-  return ''
+  return '',''
 ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
@@ -353,6 +361,29 @@ ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
+def handleSqlQueryError(querystatus, data_hash, dw_lookup_errfile, testing_value_file, logkey='')
+  # write errfile
+  msg = "Data warehouse lookup for ISBN encountered errors. \n"
+  msg += "Customizations based on imprint may be missing (logo(s), custom formatting from CSS, newsletter links, etc)"
+  msg += "\n \n(detailed output:)\n "
+  msg += querystatus
+  Mcmlln::Tools.overwriteFile(dw_lookup_errfile, msg)
+  logstring = "not the first sql err this run, (re)wrote err textfile"
+
+  # if this is the first dw lookup failure on this run, write to cfg.json & send email alert
+  ### \/ this function is reused in other scripts, but this is the first time, so the below conditional is not necessary
+  # if !data_hash.has_key?('dw_sql_err')
+    data_hash['dw_sql_err'] = querystatus
+    Mcmlln::Tools.write_json(data_hash, Metadata.configfile)
+    # send mail
+    Mcmlln::Tools.sendAlertMailtoWF('dw_isbn_lookup', msg, testing_value_file, Bkmkr::Project.filename_normalized, Bkmkr::Keys.smtp_address)
+    logstring = "sql err, first this run; logging to cfg.json and sending alert-mail"
+  # end
+rescue => logstring
+ensure
+  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+end
+
 # ---------------------- PROCESSES
 
 data_hash = readConfigJson('read_config_json')
@@ -372,11 +403,11 @@ testing_value = testingValue(testing_value_file, 'testing_value_test')
 @log_hash['running_on_testing_server'] = testing_value
 
 # determine ISBNs
-pisbn, eisbn, allworks = getIsbns(data_hash, Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename, isbn_stylename, 'get_isbns')
+pisbn, eisbn, allworks, querystatus = getIsbns(data_hash, Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename, isbn_stylename, 'get_isbns')
 @log_hash['pisbn'] = pisbn
 
 # get imprint for logo placement
-imprint = findImprint(data_hash, Bkmkr::Paths.outputtmp_html, pisbn, eisbn, 'find_imprint')
+imprint, querystatus = findImprint(data_hash, Bkmkr::Paths.outputtmp_html, pisbn, eisbn, querystatus, 'find_imprint')
 @log_hash['imprint'] = imprint
 
 # getting resource_dir based on imprint, for logo
@@ -478,6 +509,11 @@ end
 # titlepage-maker test
 titlepageTest(final_cover, 'titlepage_test')
 
+if querystatus != 'success' and querystatus != ''
+  # full path of lookup error file
+  dw_lookup_errfile = File.join(Metadata.final_dir, "ISBN_LOOKUP_ERROR.txt")
+  handleSqlQueryError(querystatus, data_hash, dw_lookup_errfile, testing_value_file, 'handle_sql_query_err')
+end
 
 # ---------------------- LOGGING
 
