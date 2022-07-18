@@ -161,7 +161,7 @@
 	@footnotes {
 		font-family: "ArnoPro-SmText", serif;
 		font-size: 9pt;
-		background-image: url("https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/generic/titlepage-rule.jpg");
+		background-image: url("S:/resources/bookmaker_scripts/bookmaker_assets/pdfmaker/images/generic/titlepage-rule.jpg");
 		background-position: 0 0in;
 		background-size: 60pt auto;
 		background-repeat: no-repeat;
@@ -1826,24 +1826,24 @@ p.Blank-Space-BreakBsbrk {
 }
 
 p.Blank-Space-BreakBsbrk {
-  background-image: url("https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/generic/titlepage-rule.jpg");
+  background-image: url("S:/resources/bookmaker_scripts/bookmaker_assets/pdfmaker/images/generic/titlepage-rule.jpg");
   background-size: 60pt auto;
 }
 
 p.Ornamental-Space-BreakOsbrk {
-  background-image: url("https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/generic/orn.jpg");
+  background-image: url("S:/resources/bookmaker_scripts/bookmaker_assets/pdfmaker/images/generic/orn.jpg");
   background-size: 20.5pt auto;
   height: 16pt;
 }
 
 div[data-type=part] > p.Ornamental-Space-BreakOsbrk {
-  background-image: url("https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/generic/titlepage-rule.jpg");
+  background-image: url("S:/resources/bookmaker_scripts/bookmaker_assets/pdfmaker/images/generic/titlepage-rule.jpg");
   background-size: 60pt auto;
 }
 
 /* need clarification */
 p.SpaceBreakwithALTOrnamentorn2 {
-  background-image: url("https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/generic/orn-bull.jpg");
+  background-image: url("S:/resources/bookmaker_scripts/bookmaker_assets/pdfmaker/images/generic/orn-bull.jpg");
   background-size: 21.6pt auto;
   height: 16pt;
 }
