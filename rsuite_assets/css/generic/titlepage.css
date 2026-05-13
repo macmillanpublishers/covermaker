@@ -100,14 +100,14 @@
 
 @font-face {
 	font-family: "FaberSansPro";
-	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/FaberSansPro-Italic.otf');
+	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/fabersanspro66.otf');
 	font-style: italic;
 	font-weight: normal;
 }
 
 @font-face {
 	font-family: "FaberSansPro";
-	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/FaberSansPro-Regular.otf');
+	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/fabersanspro65.otf');
 	font-style: normal;
 	font-weight: normal;
 }
