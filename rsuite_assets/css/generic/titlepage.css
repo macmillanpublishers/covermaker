@@ -99,15 +99,15 @@
 }
 
 @font-face {
-	font-family: "PetalaPro";
-	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/PetalaPro-Italic.otf');
+	font-family: "FaberSansPro";
+	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/FaberSansPro-Italic.otf');
 	font-style: italic;
 	font-weight: normal;
 }
 
 @font-face {
-	font-family: "PetalaPro";
-	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/PetalaPro-Regular.otf');
+	font-family: "FaberSansPro";
+	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/FaberSansPro-Regular.otf');
 	font-style: normal;
 	font-weight: normal;
 }
@@ -1013,7 +1013,7 @@ div[data-type=part] > p[class*=SubtitleSttl] {
 /* NEED CLARIFICATION */
 *[class*=Text-StandardALTatx],
 *[class*=Text-StdNo-IndentALTatx1] {
-  font-family: "PetalaPro", sans-serif, "Noto";
+  font-family: "FaberSansPro", sans-serif, "Noto";
   font-size: 9.75pt;
 }
 
@@ -1486,17 +1486,6 @@ p[class*=Extract-Noteextn] {
 }
 
 /* end note */
-span.spanaltfont1span1 {
-  font-family: royhand_pro_light;
-  font-size: 12.75pt;
-  letter-spacing: 0.02em;
-}
-
-span.spanaltfont2span2 {
-  font-family: manus;
-  font-size: 11pt;
-}
-
 blockquote[data-type=letter] p[class*=Body-TextTx] {
   font-style: italic;
 }
@@ -1758,7 +1747,7 @@ h1 + figure {
 }
 
 figcaption {
-  font-family: "PetalaPro", sans-serif, "Noto";
+  font-family: "FaberSansPro", sans-serif, "Noto";
   font-size: 8.5pt;
   line-height: 16pt;
   text-align: left;
