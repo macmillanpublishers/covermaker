@@ -99,15 +99,15 @@
 }
 
 @font-face {
-	font-family: "AromaNo2LTPro";
-	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/AromaNo2LTPro-Italic.otf');
+	font-family: "FaberSansPro";
+	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/fabersanspro66.otf');
 	font-style: italic;
 	font-weight: normal;
 }
 
 @font-face {
-	font-family: "AromaNo2LTPro";
-	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/AromaNo2LTPro-Regular.otf');
+	font-family: "FaberSansPro";
+	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/fabersanspro65.otf');
 	font-style: normal;
 	font-weight: normal;
 }
@@ -141,8 +141,8 @@
 }
 
 @font-face {
-	font-family: "TimesNewRomanPSMT";
-	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/TimesNewRomanPSMT.ttf');
+	font-family: "MinionPro";
+	src: url('S:/resources/bookmaker_scripts/bookmakerfonts/MinionPro.ttf');
 	font-style: normal;
 	font-weight: normal;
 }
@@ -1013,7 +1013,7 @@ div[data-type=part] > p[class*=SubtitleSttl] {
 /* NEED CLARIFICATION */
 *[class*=Text-StandardALTatx],
 *[class*=Text-StdNo-IndentALTatx1] {
-  font-family: "AromaNo2LTPro", sans-serif, "Noto";
+  font-family: "FaberSansPro", sans-serif, "Noto";
   font-size: 9.75pt;
 }
 
@@ -1486,17 +1486,6 @@ p[class*=Extract-Noteextn] {
 }
 
 /* end note */
-span.spanaltfont1span1 {
-  font-family: FeltpenCom-Medium;
-  font-size: 12.75pt;
-  letter-spacing: 0.02em;
-}
-
-span.spanaltfont2span2 {
-  font-family: BerrangerHandITCStd;
-  font-size: 11pt;
-}
-
 blockquote[data-type=letter] p[class*=Body-TextTx] {
   font-style: italic;
 }
@@ -1758,7 +1747,7 @@ h1 + figure {
 }
 
 figcaption {
-  font-family: "AromaNo2LTPro", sans-serif, "Noto";
+  font-family: "FaberSansPro", sans-serif, "Noto";
   font-size: 8.5pt;
   line-height: 16pt;
   text-align: left;
