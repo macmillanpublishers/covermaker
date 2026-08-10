@@ -23,10 +23,10 @@ fs.readFile(file, function editContent (err, contents) {
   };
 
   if ( $('.' + logo_stylename).length ) {
-    var logoimg = '<img src="https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/RESOURCEDIR/logo.jpg"></img>';
+    var logoimg = '<img src="S:/resources/bookmaker_scripts/bookmaker_assets/pdfmaker/images/RESOURCEDIR/logo.jpg"></img>';
     $('.' + logo_stylename).empty().append(logoimg);
   } else {
-    var logoholder = '<p class="' + logo_stylename + '"><img src="https://raw.githubusercontent.com/macmillanpublishers/bookmaker_assets/master/pdfmaker/images/RESOURCEDIR/logo.jpg"/></p>';
+    var logoholder = '<p class="' + logo_stylename + '"><img src="S:/resources/bookmaker_scripts/bookmaker_assets/pdfmaker/images/RESOURCEDIR/logo.jpg"/></p>';
     $('section[data-type="titlepage"]').append(logoholder);
   };
 
