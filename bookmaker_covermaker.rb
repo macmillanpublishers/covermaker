@@ -1,12 +1,10 @@
 ENV["NLS_LANG"] = "AMERICAN_AMERICA.WE8MSWIN1252"
 
 require 'rubygems'
-require 'doc_raptor'
 require 'fileutils'
 
 require_relative '../bookmaker/core/header.rb'
 require_relative '../bookmaker/core/metadata.rb'
-require_relative '../utilities/oraclequery.rb'
 
 # ---------------------- VARIABLES
 local_log_hash, @log_hash = Bkmkr::Paths.setLocalLoghash
@@ -22,12 +20,12 @@ cover_minheight = 800 # pixels
 # to post images and other assets to the ftp for inclusion
 # via docraptor. This auth data should be housed in
 # separate files, as laid out in the following block.
-docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_key.txt")
+# docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_key.txt")
 # ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
 # ftp_pass = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_pass.txt")
 # ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
 
-DocRaptor.api_key "#{docraptor_key}"
+# DocRaptor.api_key "#{docraptor_key}"
 
 testing_value_file = File.join(Bkmkr::Paths.resource_dir, "staging.txt")
 
@@ -218,33 +216,17 @@ def generateCover(coverdir, cover_pdf, pdf_html_contents, pdf_html_file, cover_c
     princecmd = File.join(Bkmkr::Paths.resource_dir, "Program Files (x86)", "Prince", "engine", "bin", "prince.exe")
     princecmd = "\"#{princecmd}\""
   end
-  if Bkmkr::Tools.pdfprocessor == "prince"
-    if !Bkmkr::Keys.http_username.empty? && !Bkmkr::Keys.http_password.empty?
-      princecmd = "#{princecmd} -s \"#{cover_css_file}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\""
-    else
-      princecmd = "#{princecmd} -s \"#{cover_css_file}\" --javascript \"#{pdf_html_file}\" -o \"#{cover_pdf}\""
-    end
-    if testing_value == "true"
-      princecmd = "#{princecmd} -s \"#{watermark_css}\""
-    end
-    output = `#{princecmd}`
-    @log_hash['prince_output'] = output
-  elsif Bkmkr::Tools.pdfprocessor == "docraptor"
-    FileUtils.cd(coverdir)
-    File.open(cover_pdf, "w+b") do |f|
-      f.write DocRaptor.create(:document_content => pdf_html_contents,
-                               :name             => "titlepage.pdf",
-                               :document_type    => "pdf",
-                               :strict			     => "none",
-                               :test             => "#{testing_value}",
-    	                         :prince_options	 => {
-    	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
-    	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
-                                   :javascript       => "true"
-    							             }
-                           		)
-    end
+  # if Bkmkr::Tools.pdfprocessor == "prince"
+  if !Bkmkr::Keys.http_username.empty? && !Bkmkr::Keys.http_password.empty?
+    princecmd = "#{princecmd} -s \"#{cover_css_file}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\""
+  else
+    princecmd = "#{princecmd} -s \"#{cover_css_file}\" --javascript \"#{pdf_html_file}\" -o \"#{cover_pdf}\""
   end
+  if testing_value == "true"
+    princecmd = "#{princecmd} -s \"#{watermark_css}\""
+  end
+  output = `#{princecmd}`
+  @log_hash['prince_output'] = output
 rescue => logstring
 ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
