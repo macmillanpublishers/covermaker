@@ -1,12 +1,12 @@
 require 'rubygems'
-require 'doc_raptor'
+# require 'doc_raptor'
 require 'fileutils'
 require 'htmlentities'
 
 require_relative '../bookmaker/core/header.rb'
 require_relative '../bookmaker/core/metadata.rb'
-require_relative '../utilities/oraclequery.rb'
-require_relative '../utilities/isbn_finder.rb'
+# require_relative '../utilities/oraclequery.rb'
+# require_relative '../utilities/isbn_finder.rb'
 
 # ---------------------- VARIABLES
 
@@ -42,27 +42,6 @@ ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-# wrapping a method from isbnFinder.rb so we can get output for json_logfile
-def getIsbns(config_hash, file, filename, isbn_stylename, logkey='')
-  eisbn = ''
-  allworks = []
-  logstring = 'got pisbn from config.json'
-  querystatus = ''
-  if config_hash.has_key?('printid') && config_hash['printid'] != '' && config_hash['printid'] != 'TK'
-    pisbn = config_hash['printid']
-  elsif config_hash.has_key?('productid')
-    pisbn = config_hash['productid']
-  else
-    pisbn, eisbn, allworks, querystatus = findBookISBNs(file, filename, isbn_stylename)
-    logstring = querystatus
-  end
-  return pisbn, eisbn, allworks, querystatus
-rescue => logstring
-  return '','','',''
-ensure
-  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
-end
-
 # Find any custom metadata overrides that users added to the file
 def getMetaElement(file, name, logkey='')
   logstring = "none"
@@ -72,78 +51,6 @@ def getMetaElement(file, name, logkey='')
     logstring = metaelement
   end
   return metaelement
-rescue => logstring
-  return ''
-ensure
-  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
-end
-
-def findImprint(config_hash, file, pisbn, eisbn, querystatus, logkey='')
-  logstring = "Not Found"
-  if config_hash.has_key?('imprint') && config_hash['imprint'] != '' && config_hash['imprint'] != 'TK'
-    imprint = config_hash['imprint']
-    logstring = "Found imprint in config.json: #{imprint}"
-  elsif pisbn.length == 13 and (querystatus == '' or querystatus == 'success')
-    thissql = exactSearchSingleKey(pisbn, "EDITION_EAN")
-    isbnhash, querystatus = runQuery(thissql)
-    logstring = querystatus
-    if querystatus == 'success' and (isbnhash.nil? or isbnhash.empty? or !isbnhash)
-      imprint = "Macmillan"
-      logstring =  "Unable to connect to DW; using default imprint: #{imprint}"
-    elsif querystatus == 'success'
-      imprint = isbnhash["book"]["IMPRINT_DESC"]
-      logstring =  "Found imprint in DW: #{imprint}"
-    end
-  elsif eisbn.length == 13 and (querystatus == '' or querystatus == 'success')
-    thissql = exactSearchSingleKey(eisbn, "EDITION_EAN")
-    isbnhash, querystatus = runQuery(thissql)
-    logstring = querystatus
-    if querystatus == 'success' and (isbnhash.nil? or isbnhash.empty? or !isbnhash)
-      imprint = "Macmillan"
-      logstring =  "Unable to connect to DW; using default imprint: #{imprint}"
-    elsif querystatus == 'success'
-      imprint = isbnhash["book"]["IMPRINT_DESC"]
-      logstring =  "Found imprint in DW: #{imprint}"
-    end
-  elsif querystatus != '' and querystatus != 'success'
-    imprint = "Macmillan"
-    logstring = "Skipping dw_lookup b/c previous dw_lookup failed; using default imprint: #{imprint}"
-  else
-    imprint = "Macmillan"
-    logstring = "No pisbn, isbn, or previously found value for imprint; using default imprint: #{imprint}"
-  end
-
-  # if there is custom imprint metadata, use that instead of whatever is in the DW
-  metaimprint = getMetaElement(file, "imprint", 'custom_imprint_metaelement')
-  unless metaimprint.nil?
-    imprint = metaimprint
-    logstring = metaimprint
-  end
-
-  return imprint, querystatus
-rescue => logstring
-  return '',''
-ensure
-  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
-end
-
-# determine directory name for assets e.g. css, js, logo images
-def getResourceDir(imprint, json, logkey='')
-  data_hash = Mcmlln::Tools.readjson(json)
-  arr = []
-  # loop through each json record to see if imprint name matches formalname
-  data_hash['imprints'].each do |p|
-    if p['formalname'] == imprint
-      arr << p['shortname']
-    end
-  end
-  # in case of multiples, grab just the last entry and return it
-  if arr.nil? or arr.empty?
-    path = "generic"
-  else
-    path = arr.pop
-  end
-  return path
 rescue => logstring
   return ''
 ensure
@@ -291,33 +198,16 @@ def generateTitlepage(coverdir, cover_pdf, pdf_html_contents, pdf_html_file, cov
     princecmd = File.join(Bkmkr::Paths.resource_dir, "Program Files (x86)", "Prince", "engine", "bin", "prince.exe")
     princecmd = "\"#{princecmd}\""
   end
-  if Bkmkr::Tools.pdfprocessor == "prince"
-    if !Bkmkr::Keys.http_username.empty? && !Bkmkr::Keys.http_password.empty?
-      princecmd = "#{princecmd} -s \"#{cover_css_file}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\""
-    else
-      princecmd = "#{princecmd} -s \"#{cover_css_file}\" --javascript \"#{pdf_html_file}\" -o \"#{cover_pdf}\""
-    end
-    if testing_value == "true"
-      princecmd = "#{princecmd} -s \"#{watermark_css}\""
-    end
-    output = `#{princecmd}`
-    @log_hash['prince_output'] = output
-  elsif Bkmkr::Tools.pdfprocessor == "docraptor"
-    FileUtils.cd(coverdir)
-    File.open(cover_pdf, "w+b") do |f|
-      f.write DocRaptor.create(:document_content => pdf_html_contents,
-                               :name             => "titlepage.pdf",
-                               :document_type    => "pdf",
-                               :strict			     => "none",
-                               :test             => "#{testing_value}",
-    	                         :prince_options	 => {
-    	                           :http_user		 => "#{Bkmkr::Keys.http_username}",
-    	                           :http_password	 => "#{Bkmkr::Keys.http_password}",
-                                   :javascript       => "true"
-    							             }
-                           		)
-    end
+  if !Bkmkr::Keys.http_username.empty? && !Bkmkr::Keys.http_password.empty?
+    princecmd = "#{princecmd} -s \"#{cover_css_file}\" --javascript --http-user=#{Bkmkr::Keys.http_username} --http-password=#{Bkmkr::Keys.http_password} \"#{pdf_html_file}\" -o \"#{cover_pdf}\""
+  else
+    princecmd = "#{princecmd} -s \"#{cover_css_file}\" --javascript \"#{pdf_html_file}\" -o \"#{cover_pdf}\""
   end
+  if testing_value == "true"
+    princecmd = "#{princecmd} -s \"#{watermark_css}\""
+  end
+  output = `#{princecmd}`
+  @log_hash['prince_output'] = output
 rescue => logstring
 ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
@@ -361,28 +251,28 @@ ensure
   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
 end
 
-def handleSqlQueryError(querystatus, data_hash, dw_lookup_errfile, testing_value_file, logkey='')
-  # write errfile
-  msg = "Data warehouse lookup for ISBN encountered errors. \n"
-  msg += "Customizations based on imprint may be missing (logo(s), custom formatting from CSS, newsletter links, etc)"
-  msg += "\n \n(detailed output:)\n "
-  msg += querystatus
-  Mcmlln::Tools.overwriteFile(dw_lookup_errfile, msg)
-  logstring = "not the first sql err this run, (re)wrote err textfile"
+# def handleSqlQueryError(querystatus, data_hash, dw_lookup_errfile, testing_value_file, logkey='')
+#   # write errfile
+#   msg = "Data warehouse lookup for ISBN encountered errors. \n"
+#   msg += "Customizations based on imprint may be missing (logo(s), custom formatting from CSS, newsletter links, etc)"
+#   msg += "\n \n(detailed output:)\n "
+#   msg += querystatus
+#   Mcmlln::Tools.overwriteFile(dw_lookup_errfile, msg)
+#   logstring = "not the first sql err this run, (re)wrote err textfile"
 
-  # if this is the first dw lookup failure on this run, write to cfg.json & send email alert
-  ### \/ this function is reused in other scripts, but this is the first time, so the below conditional is not necessary
-  # if !data_hash.has_key?('dw_sql_err')
-    data_hash['dw_sql_err'] = querystatus
-    Mcmlln::Tools.write_json(data_hash, Metadata.configfile)
-    # send mail
-    Mcmlln::Tools.sendAlertMailtoWF('dw_isbn_lookup', msg, testing_value_file, Bkmkr::Project.filename_normalized, Bkmkr::Keys.smtp_address)
-    logstring = "sql err, first this run; logging to cfg.json and sending alert-mail"
-  # end
-rescue => logstring
-ensure
-  Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
-end
+#   # if this is the first dw lookup failure on this run, write to cfg.json & send email alert
+#   ### \/ this function is reused in other scripts, but this is the first time, so the below conditional is not necessary
+#   # if !data_hash.has_key?('dw_sql_err')
+#     data_hash['dw_sql_err'] = querystatus
+#     Mcmlln::Tools.write_json(data_hash, Metadata.configfile)
+#     # send mail
+#     Mcmlln::Tools.sendAlertMailtoWF('dw_isbn_lookup', msg, testing_value_file, Bkmkr::Project.filename_normalized, Bkmkr::Keys.smtp_address)
+#     logstring = "sql err, first this run; logging to cfg.json and sending alert-mail"
+#   # end
+# rescue => logstring
+# ensure
+#   Mcmlln::Tools.logtoJson(@log_hash, logkey, logstring)
+# end
 
 # ---------------------- PROCESSES
 
@@ -391,10 +281,8 @@ data_hash = readConfigJson('read_config_json')
 # => we use any non-default config.json values to determine which imprint logo to inserted
 doctemplatetype = data_hash['doctemplatetype']
 if doctemplatetype == 'rsuite'
-  isbn_stylename = 'cs-isbnisbn'
   pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "rsuite_assets", "css")
 else
-  isbn_stylename = 'spanISBNisbn'
   pdf_css_dir = File.join(Bkmkr::Paths.scripts_dir, "covermaker", "css")
 end
 
@@ -403,22 +291,23 @@ testing_value = testingValue(testing_value_file, 'testing_value_test')
 @log_hash['running_on_testing_server'] = testing_value
 
 # determine ISBNs
-pisbn, eisbn, allworks, querystatus = getIsbns(data_hash, Bkmkr::Paths.outputtmp_html, Bkmkr::Project.filename, isbn_stylename, 'get_isbns')
+pisbn    = data_hash['productid'].to_s
+imprint  = data_hash['imprint'].to_s
 @log_hash['pisbn'] = pisbn
-
-# get imprint for logo placement
-imprint, querystatus = findImprint(data_hash, Bkmkr::Paths.outputtmp_html, pisbn, eisbn, querystatus, 'find_imprint')
 @log_hash['imprint'] = imprint
 
 # getting resource_dir based on imprint, for logo
-resource_dir = getResourceDir(imprint, imprint_json, 'get_resource_dir')
+resource_dir = data_hash['resourcedir'].to_s
+resource_dir = 'generic' if resource_dir.empty?
+# resource_dir = getResourceDir(imprint, imprint_json, 'get_resource_dir')
 @log_hash['resource_dir'] = resource_dir
+
 
 # Authentication data is required to use docraptor and
 # to post images and other assets to the ftp for inclusion
 # via docraptor. This auth data should be housed in
 # separate files, as laid out in the following block.
-docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_key.txt")
+# docraptor_key = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/api_key.txt")
 # ftp_uname = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_username.txt")
 # ftp_pass = File.read("#{Bkmkr::Paths.scripts_dir}/bookmaker_authkeys/ftp_pass.txt")
 # ftp_dir = "http://www.macmillan.tools.vhost.zerolag.com/bookmaker/bookmakerimg"
@@ -487,7 +376,7 @@ overwriteHtml(template_html, pdf_html_contents, 'write_updated_template_html_to_
 pdf_html_contents = embedCSSinHTML(pdf_html_contents, embedcss, 'embed_css_in_html')
 
 # Docraptor setup
-DocRaptor.api_key "#{Bkmkr::Keys.docraptor_key}"
+# DocRaptor.api_key "#{Bkmkr::Keys.docraptor_key}"
 
 # Create the titlepage PDF
 unless gen == false
@@ -509,11 +398,11 @@ end
 # titlepage-maker test
 titlepageTest(final_cover, 'titlepage_test')
 
-if querystatus != 'success' and querystatus != ''
-  # full path of lookup error file
-  dw_lookup_errfile = File.join(Metadata.final_dir, "ISBN_LOOKUP_ERROR.txt")
-  handleSqlQueryError(querystatus, data_hash, dw_lookup_errfile, testing_value_file, 'handle_sql_query_err')
-end
+# if querystatus != 'success' and querystatus != ''
+#   # full path of lookup error file
+#   dw_lookup_errfile = File.join(Metadata.final_dir, "ISBN_LOOKUP_ERROR.txt")
+#   handleSqlQueryError(querystatus, data_hash, dw_lookup_errfile, testing_value_file, 'handle_sql_query_err')
+# end
 
 # ---------------------- LOGGING
 
